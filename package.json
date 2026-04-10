@@ -1,0 +1,7 @@
+{
+    "name": "agent-orchestrator",
+    "version": "1.0.0",
+    "dependencies": {
+        "typescript": "^5.4.0"
+    }
+}
