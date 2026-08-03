@@ -27,5 +27,8 @@
   "devDependencies": {
     "@types/node": "^26.1.2",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@genkit-ai/google-genai": "^1.40.1"
   }
 }
