@@ -1,1 +1,0 @@
-// Refactored helper 4

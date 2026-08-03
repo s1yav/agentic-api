@@ -2,11 +2,30 @@
   "name": "agentic-api",
   "version": "1.0.0",
   "description": "Multi-agent task orchestrator utilizing structured outputs and state graphs in TypeScript.",
-  "main": "orchestrator.ts",
+  "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
-  "dependencies": {
-    "typescript": "^5.4.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s1yav/agentic-api.git"
+  },
+  "keywords": [
+    "typescript",
+    "agentic",
+    "orchestrator",
+    "ai"
+  ],
+  "author": "s1yav",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/s1yav/agentic-api/issues"
+  },
+  "homepage": "https://github.com/s1yav/agentic-api#readme",
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2"
   }
 }
