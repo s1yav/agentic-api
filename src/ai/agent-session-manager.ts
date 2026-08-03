@@ -2,7 +2,7 @@ import { Part } from 'genkit/beta';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
- * Contract interface for session storage backends (e.g. Firestore, Redis, Memory).
+ * Contract interface or API contract for session storage backends (e.g. Firestore, Redis, Memory).
  * 
  * Provides an abstraction layer for reading, writing, checking existence, and clearing
  * persistent agent session state bound to user session IDs.
@@ -22,9 +22,9 @@ export interface ISessionStore<S> {
      * Clears and deletes the stored session state from the persistent storage backend.
      *
      * @param sessionId The unique session identifier to clear.
-     * @returns A promise that resolves when the session has been cleared.
+     * @returns A promise that resolves with true when the session has been cleared.
      */
-    clear(sessionId: string): Promise<void>;
+    clear(sessionId: string): Promise<boolean>;
 
     /**
      * Retrieves the stored session state from the persistent storage backend.
@@ -39,7 +39,7 @@ export interface ISessionStore<S> {
      *
      * @param sessionId The unique session identifier.
      * @param state The updated session state object to persist.
-     * @returns A promise that resolves when the state is successfully saved.
+     * @returns A promise that resolves when the state is successfully saved with a sessionId.
      */
     set(sessionId: string, state: S): Promise<void>;
 }

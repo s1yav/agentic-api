@@ -3,7 +3,7 @@ import { enableGoogleCloudTelemetry } from '@genkit-ai/google-cloud';
 import { vertexAI } from '@genkit-ai/google-genai';
 
 // Enable remote telemetry collection when running in production.
-if (process.env.NODE_ENV == 'production') {
+if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'dev') {
     console.log('[Production environment] Enabling Google Cloud Telemetry.');
     enableGoogleCloudTelemetry();
 };
