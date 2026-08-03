@@ -1,4 +1,17 @@
-import { ai } from './genkit'
-import { AgentSessionManager } from './agentSessionManager'
+import { ai } from './genkit';
+import {
+  GenericAgentSessionManager,
+  IAgentSessionManager,
+  ISessionStore,
+  IContextProvider,
+  IInterruptHandler,
+} from './agent-session-manager';
 
-export { ai, AgentSessionManager };
+export {
+  ai,
+  GenericAgentSessionManager,
+  IAgentSessionManager,
+  ISessionStore,
+  IContextProvider,
+  IInterruptHandler,
+};
