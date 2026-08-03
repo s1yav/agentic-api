@@ -7,7 +7,7 @@ import { DecodedIdToken } from 'firebase-admin/auth';
  * Provides an abstraction layer for reading, writing, checking existence, and clearing
  * persistent agent session state bound to user session IDs.
  *
- * @template S The generic shape of the state stored within the session store.
+ * @template S The shape of the state stored within the session store.
  */
 export interface ISessionStore<S> {
     /**
@@ -51,7 +51,7 @@ export interface ISessionStore<S> {
  * menu/catalog data, environment flags, or active sub-state) to be constructed dynamically
  * prior to invoking the underlying LLM agent.
  *
- * @template S The generic shape of the agent's session state.
+ * @template S The shape of the agent's session state.
  */
 export interface IContextProvider<S> {
     /**
@@ -71,7 +71,7 @@ export interface IContextProvider<S> {
  * before placing an order or performing a sensitive action), this interface handles formatting
  * the intermediate response for the client and constructing the restart options to resume execution.
  *
- * @template S The generic shape of the agent's session state.
+ * @template S The shape of the agent's session state.
  * @template TResponse The type of the final response delivered back to the client application.
  */
 export interface IInterruptHandler<S, TResponse> {
@@ -101,12 +101,12 @@ export interface IInterruptHandler<S, TResponse> {
 }
 
 /**
- * Public contract interface defining operations for generic Agent Session Managers.
+ * Public contract interface defining operations for Agent Session Managers.
  * 
  * Provides a standardized API for sending text/media messages, handling multi-turn sessions,
  * resuming human-in-the-loop tool confirmations, and managing persistent state lifecycle.
  *
- * @template S The generic shape of the session state.
+ * @template S The shape of the session state.
  * @template TResponse The type of response returned to the client.
  */
 export interface IAgentSessionManager<S, TResponse> {
@@ -153,27 +153,26 @@ export interface IAgentSessionManager<S, TResponse> {
 }
 
 /**
- * Generic, interface-based composable Agent Session Manager implementation.
+ * Interface-based composable Agent Session Manager implementation.
  * 
  * This class decouples agent execution logic from storage mechanisms, context providers,
  * and interrupt handlers using Interface Composition and Dependency Injection.
  * 
  * **Key Architectural Features:**
- * - **Generic State (`S`)**: Accommodates any domain state shape without subclasses.
+ * - **Typed State (`S`)**: Accommodates any domain state shape without subclasses.
  * - **Strategy Injection**: Accepts pluggable `ISessionStore`, `IContextProvider`, and `IInterruptHandler` instances.
- * - **Decoupled Agent Runner**: Invokes AI agents via a generic function runner instead of hardcoded agent classes.
+ * - **Decoupled Agent Runner**: Invokes AI agents via a function runner instead of hardcoded agent classes.
  *
- * @template S The generic shape of the session state stored in the session store.
+ * @template S The shape of the session state stored in the session store.
  * @template TResponse The type of response returned to the caller.
  */
-export class GenericAgentSessionManager<S extends Record<string, any>, TResponse>
-    implements IAgentSessionManager<S, TResponse>
-{
+export class AgentSessionManager<S extends Record<string, any>, TResponse>
+    implements IAgentSessionManager<S, TResponse> {
     /** Cached in-memory copy of the active session state for the current instance lifecycle. */
     private state?: S;
 
     /**
-     * Constructs a new GenericAgentSessionManager instance.
+     * Constructs a new AgentSessionManager instance.
      *
      * @param agentRunner Async function responsible for executing the underlying AI agent or Genkit flow.
      * @param auth The decoded Firebase authentication token representing the current user.
@@ -194,7 +193,7 @@ export class GenericAgentSessionManager<S extends Record<string, any>, TResponse
         private readonly contextProvider?: IContextProvider<S>,
         private readonly interruptHandler?: IInterruptHandler<S, TResponse>,
         private readonly responseFormatter?: (response: any, state?: S) => TResponse
-    ) {}
+    ) { }
 
     /**
      * Sends a chat message with optional multimodal media attachment (such as images or audio files).
