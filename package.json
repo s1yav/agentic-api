@@ -29,6 +29,8 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@genkit-ai/google-genai": "^1.40.1"
+    "@genkit-ai/google-cloud": "^1.40.1",
+    "@genkit-ai/google-genai": "^1.40.1",
+    "genkit": "^1.40.1"
   }
 }
