@@ -1,3 +1,3 @@
-import { agent as executiveAssistantAgent } from './executive-assistant-agent';
+import { agent as ExecutiveAssistantAgent } from './executive-assistant-agent';
 
-export const agents = [executiveAssistantAgent];
+export { ExecutiveAssistantAgent };
