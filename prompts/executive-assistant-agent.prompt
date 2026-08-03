@@ -4,6 +4,8 @@ name: executiveAssistantAgent
 description: A helper agent that can answer user questions about personal coding projects.
 config:
   temperature: 0.7
+tools:
+  - getGithubReadme
 ---
 
 # Identity

@@ -2,32 +2,34 @@ import { ai } from '../../genkit';
 import { z } from 'genkit';
 
 /**
- * TODO: Implement Executive Assistant Agent Tools
- * 
- * 1. TODO: Define `getProjectDetails` tool to fetch high-level project information,
- *    purpose, key capabilities, and architecture overview for featured projects.
- * 
- * 2. TODO: Define `getGithubRepoMetadata` tool to fetch public repository details
- *    (technologies used, license, README summary) without exposing private data or commit times.
- * 
- * 3. TODO: Define `getPortfolioProjects` tool to list featured portfolio projects and their goals.
+ * Genkit Tool to fetch the raw README.md content of a public GitHub repository.
  */
-
-// TODO: Example tool definition template:
-/*
-export const getProjectDetailsTool = ai.defineTool(
+export const getGithubReadmeTool = ai.defineTool(
   {
-    name: 'getProjectDetails',
-    description: 'Retrieves high-level summary and features of a specific personal coding project.',
-    inputSchema: z.object({ projectName: z.string() }),
-    outputSchema: z.object({ summary: z.string(), keyFeatures: z.array(z.string()) }),
+    name: 'getGithubReadme',
+    description: 'Fetches the raw README.md content of any public GitHub repository to explain project purpose, features, and setup.',
+    inputSchema: z.object({
+      owner: z.string().default('s1yav').describe('GitHub username or organization name (defaults to s1yav)'),
+      repo: z.string().describe('Repository name (e.g. agentic-api, agent-swarm, digital-identity-eraser)'),
+    }),
+    outputSchema: z.object({
+      readme: z.string().describe('Raw Markdown content of the repository README file'),
+    }),
   },
-  async (input) => {
-    // TODO: Implement project details lookup logic
-    return {
-      summary: `Project details for ${input.projectName}`,
-      keyFeatures: [],
-    };
+  async ({ owner, repo }) => {
+    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`;
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/vnd.github.raw+json',
+        'User-Agent': 'agentic-api',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch README for ${owner}/${repo}: ${response.statusText} (${response.status})`);
+    }
+
+    const readmeText = await response.text();
+    return { readme: readmeText };
   }
 );
-*/

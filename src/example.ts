@@ -1,5 +1,6 @@
 import { AgenticOrchestrator, Agent } from './index';
 import { AgentSessionManager, ISessionStore } from './ai/agent-session-manager';
+import { getGithubReadmeTool } from './ai/agents/executive-assistant-agent/executive-assistant-tools';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
@@ -83,6 +84,10 @@ async function runTestsAndDemos() {
 
   const cleared = await sessionManager.clearSession();
   console.log("Session Cleared:", cleared);
+
+  console.log("\n=== 3. Testing getGithubReadmeTool ===");
+  const readmeResult = await getGithubReadmeTool({ owner: "s1yav", repo: "agentic-api" });
+  console.log("Fetched README preview (first 150 chars):", readmeResult.readme.substring(0, 150) + "...");
 
   console.log("\n=== All Local Tests Passed Successfully ===");
 }
