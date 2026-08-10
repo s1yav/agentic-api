@@ -1,6 +1,6 @@
 import { AgenticOrchestrator, Agent } from './index';
 import { AgentSessionManager, ISessionStore } from './ai/agent-session-manager';
-import { getGithubReadmeTool } from './ai/agents/executive-assistant-agent/executive-assistant-tools';
+import { getGithubReadmeTool } from './ai/agents/product-manager-agent/product-manager-tools';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
