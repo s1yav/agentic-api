@@ -155,6 +155,41 @@ export interface IAgentSessionManager<S, TResponse> {
 /**
  * Interface-based composable Agent Session Manager implementation.
  * 
+ * This class decouples agent execution logic from storage mechanisms, context/**
+ * Configuration options interface for initializing an AgentSessionManager instance.
+ *
+ * @template S The shape of the session state stored in the session store.
+ * @template TResponse The type of response returned to the caller.
+ */
+export interface AgentSessionManagerArgs<S, TResponse> {
+    /** Async function responsible for executing the underlying AI agent or Genkit flow. */
+    agentRunner: (
+        message: Part[] | string,
+        options: Record<string, unknown>
+    ) => Promise<any>;
+
+    /** The decoded Firebase authentication token representing the current user. */
+    auth: DecodedIdToken;
+
+    /** Implementation of `ISessionStore` for state persistence (e.g. Firestore, Redis). */
+    sessionStore: ISessionStore<S>;
+
+    /** Default state object initialized when a user creates a new session. */
+    initialState: S;
+
+    /** Optional strategy provider to build dynamic context injected into agent calls. */
+    contextProvider?: IContextProvider<S>;
+
+    /** Optional strategy handler to process and resume human-in-the-loop tool calls. */
+    interruptHandler?: IInterruptHandler<S, TResponse>;
+
+    /** Optional formatter function to map raw agent outputs into `TResponse`. */
+    responseFormatter?: (response: any, state?: S) => TResponse;
+}
+
+/**
+ * Interface-based composable Agent Session Manager implementation.
+ * 
  * This class decouples agent execution logic from storage mechanisms, context providers,
  * and interrupt handlers using Interface Composition and Dependency Injection.
  * 
@@ -171,29 +206,31 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
     /** Cached in-memory copy of the active session state for the current instance lifecycle. */
     private state?: S;
 
+    private readonly agentRunner: (
+        message: Part[] | string,
+        options: Record<string, unknown>
+    ) => Promise<any>;
+    private readonly auth: DecodedIdToken;
+    private readonly sessionStore: ISessionStore<S>;
+    private readonly initialState: S;
+    private readonly contextProvider?: IContextProvider<S>;
+    private readonly interruptHandler?: IInterruptHandler<S, TResponse>;
+    private readonly responseFormatter?: (response: any, state?: S) => TResponse;
+
     /**
      * Constructs a new AgentSessionManager instance.
      *
-     * @param agentRunner Async function responsible for executing the underlying AI agent or Genkit flow.
-     * @param auth The decoded Firebase authentication token representing the current user.
-     * @param sessionStore Implementation of `ISessionStore` for state persistence (e.g. Firestore, Redis).
-     * @param initialState Default state object initialized when a user creates a new session.
-     * @param contextProvider Optional strategy provider to build dynamic context injected into agent calls.
-     * @param interruptHandler Optional strategy handler to process and resume human-in-the-loop tool calls.
-     * @param responseFormatter Optional formatter function to map raw agent outputs into `TResponse`.
+     * @param args Configuration options for initializing the session manager.
      */
-    constructor(
-        private readonly agentRunner: (
-            message: Part[] | string,
-            options: Record<string, unknown>
-        ) => Promise<any>,
-        private readonly auth: DecodedIdToken,
-        private readonly sessionStore: ISessionStore<S>,
-        private readonly initialState: S,
-        private readonly contextProvider?: IContextProvider<S>,
-        private readonly interruptHandler?: IInterruptHandler<S, TResponse>,
-        private readonly responseFormatter?: (response: any, state?: S) => TResponse
-    ) { }
+    constructor(args: AgentSessionManagerArgs<S, TResponse>) {
+        this.agentRunner = args.agentRunner;
+        this.auth = args.auth;
+        this.sessionStore = args.sessionStore;
+        this.initialState = args.initialState;
+        this.contextProvider = args.contextProvider;
+        this.interruptHandler = args.interruptHandler;
+        this.responseFormatter = args.responseFormatter;
+    }
 
     /**
      * Sends a chat message with optional multimodal media attachment (such as images or audio files).
@@ -324,5 +361,9 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         }
 
         return this.state;
+    }
+
+    private getSessionId(): string {
+        return this.auth.uid;
     }
 }

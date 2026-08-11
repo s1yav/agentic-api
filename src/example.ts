@@ -69,12 +69,12 @@ async function runTestsAndDemos() {
     };
   };
 
-  const sessionManager = new AgentSessionManager<TestState, { text: string }>(
-    mockAgentRunner,
-    mockAuth,
-    memoryStore,
-    { history: [] }
-  );
+  const sessionManager = new AgentSessionManager<TestState, { text: string }>({
+    agentRunner: mockAgentRunner,
+    auth: mockAuth,
+    sessionStore: memoryStore,
+    initialState: { history: [] },
+  });
 
   const initialStoreState = await sessionManager.getState();
   console.log("Initial Session State:", initialStoreState);
