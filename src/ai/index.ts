@@ -12,7 +12,4 @@ export {
   ProductManagerAgent,
   ProductManagerFlowServer,
   productManagerFlows,
-  summarizeProduct,
-  explainProductFeature,
-  gatherProductContext,
 } from './agents/product-manager-agent';
