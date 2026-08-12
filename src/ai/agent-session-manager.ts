@@ -274,13 +274,7 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
     ): Promise<TResponse> {
         const executionOptions = await this.buildExecutionOptions(options);
         const rawResponse = await this.agentRunner(message, executionOptions);
-
-        const interruptResponse = await this.tryHandleInterrupt(rawResponse);
-        if (interruptResponse) {
-            return interruptResponse;
-        }
-
-        return await this.formatResponse(rawResponse);
+        return await this.processAgentResponse(rawResponse);
     }
 
     /**
@@ -391,6 +385,14 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
             return this.contextProvider.getContext(this.auth, state);
         }
         return { auth: this.auth };
+    }
+
+    private async processAgentResponse(rawResponse: any): Promise<TResponse> {
+        const interruptResponse = await this.tryHandleInterrupt(rawResponse);
+        if (interruptResponse) {
+            return interruptResponse;
+        }
+        return await this.formatResponse(rawResponse);
     }
 
     private async tryHandleInterrupt(
