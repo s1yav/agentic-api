@@ -8,3 +8,10 @@ export {
   ContextProvider,
   InterruptHandler,
 } from './agent-session-manager';
+export {
+  ProductManagerAgent,
+  ProductManagerFlowServer,
+  summarizeProduct,
+  explainProductFeature,
+  gatherProductContext,
+} from './agents/product-manager-agent';

@@ -1,11 +1,9 @@
 import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
-import { PORT } from './ai/agents/product-manager-agent/product-manager-agent';
-import {
-  summarizeProduct,
-  explainProductFeature,
-  gatherProductContext,
-} from './ai/agents/product-manager-agent';
+import { PORT } from './product-manager-agent';
+import { summarizeProduct } from './flows/summarize-product';
+import { explainProductFeature } from './flows/explain-product-feature';
+import { gatherProductContext } from './flows/gather-product-context';
 
 /**
  * Context provider enforcing Firebase App Check token verification on incoming flow requests.
