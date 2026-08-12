@@ -13,3 +13,14 @@ export {
   ProductManagerFlowServer,
   productManagerFlows,
 } from './agents/product-manager-agent';
+export {
+  BaseError,
+  UnauthorizedError,
+  MissingHeaderError,
+  ValidationError,
+  NotFoundError,
+  AgentExecutionError,
+  HTTP_STATUS,
+  ERROR_CODES,
+  type ClientErrorPayload,
+} from '../errors';

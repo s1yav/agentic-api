@@ -2,14 +2,13 @@ import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { PORT } from './product-manager-agent';
 import { productManagerFlows } from './index';
+import { MissingHeaderError, UnauthorizedError } from '../../../errors';
 
-const APP_CHECK_HEADER = 'x-firebase-appcheck';
-const ERROR_MISSING_APP_CHECK_TOKEN = 'Unauthorized: Missing X-Firebase-AppCheck token header';
-const ERROR_INVALID_APP_CHECK_TOKEN = 'Unauthorized: Invalid Firebase App Check token';
+const APP_CHECK_HEADER = 'X-Firebase-AppCheck';
 
 const CORS_ORIGIN = '*';
 const CORS_METHODS = ['POST', 'OPTIONS'];
-const CORS_HEADERS = ['Content-Type', 'Authorization', 'X-Firebase-AppCheck'];
+const CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
 interface HttpRequest {
   headers: Record<string, string | string[] | undefined>;
@@ -51,18 +50,23 @@ async function authenticateRequest(req: HttpRequest) {
 }
 
 function extractAppCheckToken(req: HttpRequest): string {
-  const token = req.headers[APP_CHECK_HEADER] as string | undefined;
-  if (!token) {
-    throw new Error(ERROR_MISSING_APP_CHECK_TOKEN);
+  const headerKey = APP_CHECK_HEADER.toLowerCase();
+  const token = req.headers[headerKey] || req.headers[APP_CHECK_HEADER];
+  const tokenValue = Array.isArray(token) ? token[0] : token;
+
+  if (!tokenValue) {
+    throw new MissingHeaderError(APP_CHECK_HEADER);
   }
-  return token;
+
+  return tokenValue;
 }
 
 async function verifyAppCheckToken(token: string) {
   try {
     return await getAppCheck().verifyToken(token);
-  } catch {
-    throw new Error(ERROR_INVALID_APP_CHECK_TOKEN);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
 }
 
