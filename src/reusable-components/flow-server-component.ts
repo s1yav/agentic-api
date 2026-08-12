@@ -19,9 +19,6 @@ export interface FlowServerArgs {
   agentName: string;
   port: number;
   flows: Record<string, unknown> | FlowInput[];
-  corsOrigin?: string;
-  allowedHeaders?: string[];
-  autoStartLog?: boolean;
 }
 
 interface CorsArgs {
@@ -38,7 +35,7 @@ interface CorsArgs {
 export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitFlowServer> {
   const flowList = convertFlowsInputToList(args.flows);
   const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
-  const cors = buildCorsArgs(args.corsOrigin, args.allowedHeaders);
+  const cors = buildCorsArgs();
 
   const server = startGenkitFlowServer({
     port: args.port,
@@ -46,9 +43,7 @@ export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGe
     flows: authenticatedFlows as ServerFlows,
   });
 
-  if (args.autoStartLog ?? true) {
-    logServerStart(args.agentName, args.port);
-  }
+  logServerStart(args.agentName, args.port);
 
   return server;
 }
@@ -92,16 +87,11 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
   }
 }
 
-function buildCorsArgs(customOrigin?: string, customHeaders?: string[]): CorsArgs {
-  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
-  const allowedHeaders = customHeaders
-    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
-    : DEFAULT_CORS_HEADERS;
-
+function buildCorsArgs(): CorsArgs {
   return {
-    origin,
+    origin: DEFAULT_CORS_ORIGIN,
     methods: DEFAULT_CORS_METHODS,
-    allowedHeaders,
+    allowedHeaders: DEFAULT_CORS_HEADERS,
   };
 }
 

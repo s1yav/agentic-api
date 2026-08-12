@@ -9,7 +9,6 @@ describe('Flow Server Component Unit Tests', () => {
       agentName: 'Test Product Manager Agent',
       port: 3999,
       flows: { summarizeProduct },
-      autoStartLog: false,
     });
 
     assert.ok(serverInstance);
@@ -21,7 +20,6 @@ describe('Flow Server Component Unit Tests', () => {
       agentName: 'Test Product Manager Agent Array',
       port: 3998,
       flows: [summarizeProduct as any],
-      autoStartLog: false,
     });
 
     assert.ok(serverInstance);
