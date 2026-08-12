@@ -1,14 +1,14 @@
 import { ai } from "../../../genkit";
 import { z } from "zod";
 
-export const summarizeProject = ai.defineFlow(
+export const summarizeProduct = ai.defineFlow(
     {
-        name: "summarize-project",
+        name: "summarize-product",
         inputSchema: z.object({
             repo: z.string().describe('Repository name'),
         }),
         outputSchema: z.object({
-            summary: z.string().describe('Summary of the project'),
+            summary: z.string().describe('Summary of the product'),
         }),
     },
     async ({ repo }) => {
