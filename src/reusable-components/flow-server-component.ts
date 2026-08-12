@@ -24,20 +24,26 @@ export interface FlowServerOptions {
   autoStartLog?: boolean;
 }
 
+interface CorsOptions {
+  origin: string;
+  methods: string[];
+  allowedHeaders: string[];
+}
+
 /**
  * Creates and configures a secure Express Flow Server for an Agent.
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function createFlowServer(options: FlowServerOptions) {
-  const flowList = normalizeFlows(options.flows);
-  const configuredFlows = configureFlows(flowList);
+export function createFlowServer(options: FlowServerOptions): ReturnType<typeof startFlowServer> {
+  const flowList = convertFlowsInputToList(options.flows);
+  const authenticatedFlows = applyAuthenticationOptionsToFlows(flowList);
   const cors = buildCorsOptions(options.corsOrigin, options.allowedHeaders);
 
   const server = startFlowServer({
     port: options.port,
     cors,
-    flows: configuredFlows as ServerFlows,
+    flows: authenticatedFlows as ServerFlows,
   });
 
   if (options.autoStartLog ?? true) {
@@ -47,31 +53,16 @@ export function createFlowServer(options: FlowServerOptions) {
   return server;
 }
 
-function normalizeFlows(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
+function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
   return Array.isArray(flows) ? (flows as FlowInput[]) : (Object.values(flows) as FlowInput[]);
 }
 
-function configureFlows(flows: FlowInput[]) {
+function applyAuthenticationOptionsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
   const flowOptions = { contextProvider: authenticateRequest };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-function buildCorsOptions(
-  origin: string = DEFAULT_CORS_ORIGIN,
-  allowedHeaders: string[] = DEFAULT_CORS_HEADERS
-) {
-  return {
-    origin,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
-}
-
-async function authenticateRequest(req: HttpRequest) {
+async function authenticateRequest(req: HttpRequest): Promise<{ appCheck: unknown }> {
   const token = extractAppCheckToken(req);
   const claims = await verifyAppCheckToken(token);
   return { appCheck: claims };
@@ -79,7 +70,7 @@ async function authenticateRequest(req: HttpRequest) {
 
 function extractAppCheckToken(req: HttpRequest): string {
   const headerKey = APP_CHECK_HEADER.toLowerCase();
-  const token = req.headers[headerKey] || req.headers[APP_CHECK_HEADER];
+  const token = req.headers?.[headerKey] || req.headers?.[APP_CHECK_HEADER];
   const tokenValue = Array.isArray(token) ? token[0] : token;
 
   if (!tokenValue) {
@@ -89,11 +80,26 @@ function extractAppCheckToken(req: HttpRequest): string {
   return tokenValue;
 }
 
-async function verifyAppCheckToken(token: string) {
+async function verifyAppCheckToken(token: string): Promise<unknown> {
   try {
     return await getAppCheck().verifyToken(token);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
+}
+
+function buildCorsOptions(
+  origin: string = DEFAULT_CORS_ORIGIN,
+  allowedHeaders: string[] = DEFAULT_CORS_HEADERS
+): CorsOptions {
+  return {
+    origin,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders,
+  };
+}
+
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
