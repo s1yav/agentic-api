@@ -3,8 +3,10 @@ import { PORT } from './product-manager-agent';
 import { summarizeProduct } from './flows/summarize-product';
 import { explainProductFeature } from './flows/explain-product-feature';
 import { gatherProductContext } from './flows/gather-product-context';
+import { introduceProductManager } from './flows/introduce-product-manager';
 
 export const productManagerFlows = {
+  introduceProductManager,
   summarizeProduct,
   explainProductFeature,
   gatherProductContext,

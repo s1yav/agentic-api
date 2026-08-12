@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/ai/index.js",
     "start:pm-server": "npm run build && node dist/ai/agents/product-manager-agent/flow-server.js",
-    "test": "npx tsc --project tsconfig.test.json && node --test dist/tests/errors/index.test.js dist/tests/reusable-components/flow-server-component.test.js"
+    "test": "npx tsc --project tsconfig.test.json && node --test dist/tests/errors/index.test.js dist/tests/reusable-components/flow-server-component.test.js dist/tests/agents/product-manager-agent/introduce-product-manager.test.js"
   },
   "repository": {
     "type": "git",
