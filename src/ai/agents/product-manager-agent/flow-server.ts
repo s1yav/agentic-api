@@ -1,9 +1,7 @@
 import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { PORT } from './product-manager-agent';
-import { summarizeProduct } from './flows/summarize-product';
-import { explainProductFeature } from './flows/explain-product-feature';
-import { gatherProductContext } from './flows/gather-product-context';
+import { productManagerFlows } from './index';
 
 const APP_CHECK_HEADER = 'x-firebase-appcheck';
 const ERROR_MISSING_APP_CHECK_TOKEN = 'Unauthorized: Missing X-Firebase-AppCheck token header';
@@ -22,7 +20,7 @@ logServerStart(Number(PORT));
 
 function createFlowServer() {
   const options = { contextProvider: authenticateRequest };
-  const flows = [summarizeProduct, explainProductFeature, gatherProductContext];
+  const flows = Object.values(productManagerFlows);
 
   return startFlowServer({
     port: Number(PORT),

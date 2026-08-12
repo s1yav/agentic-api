@@ -11,6 +11,7 @@ export {
 export {
   ProductManagerAgent,
   ProductManagerFlowServer,
+  productManagerFlows,
   summarizeProduct,
   explainProductFeature,
   gatherProductContext,
