@@ -10,6 +10,7 @@ const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER]
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
 type ServerFlows = Parameters<typeof startGenkitFlowServer>[0]['flows'];
+type FlowServerOptions = Parameters<typeof startGenkitFlowServer>[0];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -33,19 +34,24 @@ interface CorsArgs {
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
 export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitFlowServer> {
-  const flowList = convertFlowsInputToList(args.flows);
-  const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
-  const cors = buildCorsArgs();
-
-  const server = startGenkitFlowServer({
-    port: args.port,
-    cors,
-    flows: authenticatedFlows as ServerFlows,
-  });
+  const options = buildFlowServerOptions(args);
+  const server = startGenkitFlowServer(options);
 
   logServerStart(args.agentName, args.port);
 
   return server;
+}
+
+function buildFlowServerOptions(args: FlowServerArgs): FlowServerOptions {
+  const flowList = convertFlowsInputToList(args.flows);
+  const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
+  const cors = buildCorsArgs();
+
+  return {
+    port: args.port,
+    cors,
+    flows: authenticatedFlows as ServerFlows,
+  };
 }
 
 function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
@@ -58,6 +64,18 @@ function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): 
 function applyAuthenticationArgsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
   const flowOptions = { contextProvider: buildAuthContext };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
+}
+
+function buildCorsArgs(): CorsArgs {
+  return {
+    origin: DEFAULT_CORS_ORIGIN,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders: DEFAULT_CORS_HEADERS,
+  };
+}
+
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
 
 async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
@@ -85,16 +103,4 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
     const reason = error instanceof Error ? error.message : String(error);
     throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
-}
-
-function buildCorsArgs(): CorsArgs {
-  return {
-    origin: DEFAULT_CORS_ORIGIN,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders: DEFAULT_CORS_HEADERS,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
