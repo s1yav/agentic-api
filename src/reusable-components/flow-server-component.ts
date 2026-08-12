@@ -1,6 +1,6 @@
 import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
-import { MissingHeaderError, UnauthorizedError } from '../../../errors';
+import { MissingHeaderError, UnauthorizedError } from '../errors';
 
 const APP_CHECK_HEADER = 'X-Firebase-AppCheck';
 

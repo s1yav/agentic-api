@@ -1,4 +1,4 @@
-import { createFlowServer } from '../components/flow-server-component';
+import { createFlowServer } from '../../../reusable-components';
 import { PORT } from './product-manager-agent';
 import { summarizeProduct } from './flows/summarize-product';
 import { explainProductFeature } from './flows/explain-product-feature';
