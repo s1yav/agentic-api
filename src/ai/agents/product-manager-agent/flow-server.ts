@@ -5,37 +5,69 @@ import { summarizeProduct } from './flows/summarize-product';
 import { explainProductFeature } from './flows/explain-product-feature';
 import { gatherProductContext } from './flows/gather-product-context';
 
-/**
- * Context provider enforcing Firebase App Check token verification on incoming flow requests.
- */
-async function appCheckContextProvider(req: any) {
-  const appCheckToken = req.headers['x-firebase-appcheck'] as string | undefined;
-  if (!appCheckToken) {
-    throw new Error('Unauthorized: Missing X-Firebase-AppCheck token header');
-  }
+const APP_CHECK_HEADER = 'x-firebase-appcheck';
+const ERROR_MISSING_APP_CHECK_TOKEN = 'Unauthorized: Missing X-Firebase-AppCheck token header';
+const ERROR_INVALID_APP_CHECK_TOKEN = 'Unauthorized: Invalid Firebase App Check token';
 
+const CORS_ORIGIN = '*';
+const CORS_METHODS = ['POST', 'OPTIONS'];
+const CORS_HEADERS = ['Content-Type', 'Authorization', 'X-Firebase-AppCheck'];
+
+interface HttpRequest {
+  headers: Record<string, string | string[] | undefined>;
+}
+
+export const server = createFlowServer();
+logServerStart(Number(PORT));
+
+function createFlowServer() {
+  const options = { contextProvider: authenticateRequest };
+  const flows = [summarizeProduct, explainProductFeature, gatherProductContext];
+
+  return startFlowServer({
+    port: Number(PORT),
+    cors: buildCorsOptions(),
+    flows: configureFlowsWithOptions(flows, options),
+  });
+}
+
+function buildCorsOptions() {
+  return {
+    origin: CORS_ORIGIN,
+    methods: CORS_METHODS,
+    allowedHeaders: CORS_HEADERS,
+  };
+}
+
+function configureFlowsWithOptions(
+  flows: Array<Parameters<typeof withFlowOptions>[0]>,
+  options: Parameters<typeof withFlowOptions>[1]
+) {
+  return flows.map((flow) => withFlowOptions(flow, options));
+}
+
+async function authenticateRequest(req: HttpRequest) {
+  const token = extractAppCheckToken(req);
+  const claims = await verifyAppCheckToken(token);
+  return { appCheck: claims };
+}
+
+function extractAppCheckToken(req: HttpRequest): string {
+  const token = req.headers[APP_CHECK_HEADER] as string | undefined;
+  if (!token) {
+    throw new Error(ERROR_MISSING_APP_CHECK_TOKEN);
+  }
+  return token;
+}
+
+async function verifyAppCheckToken(token: string) {
   try {
-    const appCheckClaims = await getAppCheck().verifyToken(appCheckToken);
-    return { appCheck: appCheckClaims };
-  } catch (error) {
-    throw new Error('Unauthorized: Invalid Firebase App Check token');
+    return await getAppCheck().verifyToken(token);
+  } catch {
+    throw new Error(ERROR_INVALID_APP_CHECK_TOKEN);
   }
 }
 
-const flowServerOptions = { contextProvider: appCheckContextProvider };
-
-export const server = startFlowServer({
-  port: Number(PORT),
-  cors: {
-    origin: '*',
-    methods: ['POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-AppCheck'],
-  },
-  flows: [
-    withFlowOptions(summarizeProduct, flowServerOptions),
-    withFlowOptions(explainProductFeature, flowServerOptions),
-    withFlowOptions(gatherProductContext, flowServerOptions),
-  ],
-});
-
-console.log(`[Product Manager Agent] Flow server running on port ${PORT}`);
+function logServerStart(port: number): void {
+  console.log(`[Product Manager Agent] Flow server running on port ${port}`);
+}
