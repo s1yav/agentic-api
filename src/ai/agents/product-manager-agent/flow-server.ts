@@ -1,4 +1,4 @@
-import { startFlowServer } from '../../../reusable-components';
+import { FlowServerComponent } from '../../../reusable-components';
 import { PORT } from './product-manager-agent';
 import { summarizeProduct } from './flows/summarize-product';
 import { explainProductFeature } from './flows/explain-product-feature';
@@ -10,8 +10,10 @@ export const productManagerFlows = {
   gatherProductContext,
 } as const;
 
-export const server = startFlowServer({
+export const flowServer = new FlowServerComponent({
   agentName: 'Product Manager Agent',
   port: Number(PORT),
   flows: productManagerFlows,
 });
+
+export const server = flowServer.start();

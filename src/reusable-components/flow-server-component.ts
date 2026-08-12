@@ -1,4 +1,4 @@
-import { startFlowServer as startGenkitFlowServer, withFlowOptions } from '@genkit-ai/express';
+import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { MissingHeaderError, UnauthorizedError } from '../errors';
 
@@ -9,8 +9,8 @@ const DEFAULT_CORS_METHODS = ['POST', 'OPTIONS'];
 const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
-type ServerFlows = Parameters<typeof startGenkitFlowServer>[0]['flows'];
-type GenkitFlowServerOptions = Parameters<typeof startGenkitFlowServer>[0];
+type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
+type GenkitFlowServerOptions = Parameters<typeof startFlowServer>[0];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -29,17 +29,53 @@ interface CorsArgs {
 }
 
 /**
- * Creates and starts a secure Express Flow Server for an Agent.
- *
- * Enforces Firebase App Check authentication, CORS policies, and flow options.
+ * Reusable Class Component that encapsulates configuration, App Check authentication,
+ * CORS headers, and lifecycle management for Express Flow Servers.
  */
-export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitFlowServer> {
-  const options = buildGenkitFlowServerOptions(args);
-  const server = startGenkitFlowServer(options);
+export class FlowServerComponent {
+  private readonly args: FlowServerArgs;
+  private serverInstance: ReturnType<typeof startFlowServer> | null = null;
 
-  logServerStart(args.agentName, args.port);
+  constructor(args: FlowServerArgs) {
+    this.args = args;
+  }
 
-  return server;
+  /**
+   * Starts the secure Express Flow Server instance.
+   */
+  public start(): ReturnType<typeof startFlowServer> {
+    const options = buildGenkitFlowServerOptions(this.args);
+    this.serverInstance = startFlowServer(options);
+
+    logServerStart(this.args.agentName, this.args.port);
+
+    return this.serverInstance;
+  }
+
+  /**
+   * Gracefully stops the running server instance.
+   */
+  public async stop(): Promise<void> {
+    if (this.serverInstance) {
+      await stopServerInstance(this.serverInstance);
+      this.serverInstance = null;
+    }
+  }
+}
+
+async function stopServerInstance(serverInstance: unknown): Promise<void> {
+  const inst = serverInstance as any;
+  if (!inst) {
+    return;
+  }
+
+  if (typeof inst.stop === 'function') {
+    await inst.stop();
+  } else if (typeof inst.close === 'function') {
+    await new Promise<void>((res) => inst.close(() => res()));
+  } else if (inst.server && typeof inst.server.close === 'function') {
+    await new Promise<void>((res) => inst.server.close(() => res()));
+  }
 }
 
 function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOptions {
@@ -53,9 +89,21 @@ function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOpt
   };
 }
 
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
+}
+
 function getAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
   const flowList = getFlowInput(flows);
   return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
+}
+
+function buildCorsArgs(): CorsArgs {
+  return {
+    origin: DEFAULT_CORS_ORIGIN,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders: DEFAULT_CORS_HEADERS,
+  };
 }
 
 function getFlowInput(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
@@ -68,18 +116,6 @@ function getFlowInput(flows: Record<string, unknown> | FlowInput[]): FlowInput[]
 function applyAuthenticationArgsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
   const flowOptions = { contextProvider: buildAuthContext };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
-}
-
-function buildCorsArgs(): CorsArgs {
-  return {
-    origin: DEFAULT_CORS_ORIGIN,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders: DEFAULT_CORS_HEADERS,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
 
 async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
