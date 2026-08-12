@@ -65,10 +65,12 @@ function applyAuthenticationOptionsToFlows(flows: FlowInput[]): ReturnType<typeo
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-function buildCorsOptions(
-  origin: string = DEFAULT_CORS_ORIGIN,
-  allowedHeaders: string[] = DEFAULT_CORS_HEADERS
-): CorsOptions {
+function buildCorsOptions(customOrigin?: string, customHeaders?: string[]): CorsOptions {
+  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
+  const allowedHeaders = customHeaders
+    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
+    : DEFAULT_CORS_HEADERS;
+
   return {
     origin,
     methods: DEFAULT_CORS_METHODS,
