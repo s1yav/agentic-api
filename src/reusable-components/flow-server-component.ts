@@ -1,4 +1,4 @@
-import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
+import { startFlowServer as startGenkitExpressServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { MissingHeaderError, UnauthorizedError } from '../errors';
 
@@ -9,7 +9,7 @@ const DEFAULT_CORS_METHODS = ['POST', 'OPTIONS'];
 const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
-type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
+type ServerFlows = Parameters<typeof startGenkitExpressServer>[0]['flows'];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -19,6 +19,9 @@ export interface FlowServerArgs {
   agentName: string;
   port: number;
   flows: Record<string, unknown> | FlowInput[];
+  corsOrigin?: string;
+  allowedHeaders?: string[];
+  autoStartLog?: boolean;
 }
 
 interface CorsArgs {
@@ -32,18 +35,20 @@ interface CorsArgs {
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function createAndStartFlowServer(args: FlowServerArgs): ReturnType<typeof startFlowServer> {
+export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitExpressServer> {
   const flowList = convertFlowsInputToList(args.flows);
   const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
-  const cors = buildCorsArgs();
+  const cors = buildCorsArgs(args.corsOrigin, args.allowedHeaders);
 
-  const server = startFlowServer({
+  const server = startGenkitExpressServer({
     port: args.port,
     cors,
     flows: authenticatedFlows as ServerFlows,
   });
 
-  logServerStart(args.agentName, args.port);
+  if (args.autoStartLog ?? true) {
+    logServerStart(args.agentName, args.port);
+  }
 
   return server;
 }
@@ -87,11 +92,16 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
   }
 }
 
-function buildCorsArgs(): CorsArgs {
+function buildCorsArgs(customOrigin?: string, customHeaders?: string[]): CorsArgs {
+  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
+  const allowedHeaders = customHeaders
+    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
+    : DEFAULT_CORS_HEADERS;
+
   return {
-    origin: DEFAULT_CORS_ORIGIN,
+    origin,
     methods: DEFAULT_CORS_METHODS,
-    allowedHeaders: DEFAULT_CORS_HEADERS,
+    allowedHeaders,
   };
 }
 
