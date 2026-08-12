@@ -24,12 +24,12 @@ export interface ClientErrorPayload {
 }
 
 /**
- * Abstract Base Custom Error following the Open/Closed Principle (OCP).
+ * Abstract Base Custom Error for agentic-api following the Open/Closed Principle (OCP).
  *
  * Closed for modification: Core error properties and serialization interface are fixed.
  * Open for extension: New domain errors extend this class and define `code`, `statusCode`, or custom details.
  */
-export abstract class BaseError extends Error {
+export abstract class AgenticApiError extends Error {
   abstract readonly statusCode: number;
   abstract readonly code: string;
 
@@ -58,7 +58,7 @@ export abstract class BaseError extends Error {
 /**
  * Error thrown when authentication or security tokens (e.g., App Check, Auth tokens) fail or are missing.
  */
-export class UnauthorizedError extends BaseError {
+export class UnauthorizedError extends AgenticApiError {
   readonly statusCode = HTTP_STATUS.UNAUTHORIZED;
   readonly code = ERROR_CODES.UNAUTHORIZED;
 
@@ -70,7 +70,7 @@ export class UnauthorizedError extends BaseError {
 /**
  * Error thrown when a mandatory HTTP header is missing.
  */
-export class MissingHeaderError extends BaseError {
+export class MissingHeaderError extends AgenticApiError {
   readonly statusCode = HTTP_STATUS.BAD_REQUEST;
   readonly code = ERROR_CODES.MISSING_HEADER;
 
@@ -82,7 +82,7 @@ export class MissingHeaderError extends BaseError {
 /**
  * Error thrown when request input payloads fail validation.
  */
-export class ValidationError extends BaseError {
+export class ValidationError extends AgenticApiError {
   readonly statusCode = HTTP_STATUS.UNPROCESSABLE_ENTITY;
   readonly code = ERROR_CODES.VALIDATION_ERROR;
 
@@ -94,7 +94,7 @@ export class ValidationError extends BaseError {
 /**
  * Error thrown when a requested resource, flow, or entity is not found.
  */
-export class NotFoundError extends BaseError {
+export class NotFoundError extends AgenticApiError {
   readonly statusCode = HTTP_STATUS.NOT_FOUND;
   readonly code = ERROR_CODES.NOT_FOUND;
 
@@ -106,7 +106,7 @@ export class NotFoundError extends BaseError {
 /**
  * Error thrown when an agent execution flow encounters an unrecoverable failure.
  */
-export class AgentExecutionError extends BaseError {
+export class AgentExecutionError extends AgenticApiError {
   readonly statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
   readonly code = ERROR_CODES.AGENT_EXECUTION_ERROR;
 

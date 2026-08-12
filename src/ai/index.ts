@@ -14,7 +14,7 @@ export {
   productManagerFlows,
 } from './agents/product-manager-agent';
 export {
-  BaseError,
+  AgenticApiError,
   UnauthorizedError,
   MissingHeaderError,
   ValidationError,
