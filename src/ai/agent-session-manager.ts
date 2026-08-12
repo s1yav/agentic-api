@@ -272,16 +272,15 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         message: Part[] | string,
         options: Record<string, unknown> = {}
     ): Promise<TResponse> {
-        const state = await this.getState();
-        const executionOptions = this.buildExecutionOptions(options, state);
+        const executionOptions = await this.buildExecutionOptions(options);
         const rawResponse = await this.agentRunner(message, executionOptions);
 
-        const interruptResponse = await this.tryHandleInterrupt(rawResponse, state);
+        const interruptResponse = await this.tryHandleInterrupt(rawResponse);
         if (interruptResponse) {
             return interruptResponse;
         }
 
-        return this.formatResponse(rawResponse, state);
+        return await this.formatResponse(rawResponse);
     }
 
     /**
@@ -375,11 +374,10 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         return await this.sessionStore.get(sessionId);
     }
 
-    private buildExecutionOptions(
-        options: Record<string, unknown>,
-        state?: S
-    ): Record<string, unknown> {
-        const extraContext = this.buildExtraContext(state);
+    private async buildExecutionOptions(
+        options: Record<string, unknown>
+    ): Promise<Record<string, unknown>> {
+        const extraContext = await this.buildExtraContext();
         const initialContext = (options.context as object) || {};
         return {
             ...options,
@@ -387,17 +385,18 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         };
     }
 
-    private buildExtraContext(state?: S): Record<string, unknown> {
+    private async buildExtraContext(): Promise<Record<string, unknown>> {
         if (this.contextProvider) {
+            const state = await this.getState();
             return this.contextProvider.getContext(this.auth, state);
         }
         return { auth: this.auth };
     }
 
     private async tryHandleInterrupt(
-        response: any,
-        state?: S
+        response: any
     ): Promise<TResponse | undefined> {
+        const state = await this.getState();
         if (!this.shouldHandleInterrupt(response, state)) {
             return undefined;
         }
@@ -413,8 +412,9 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         );
     }
 
-    private formatResponse(response: any, state?: S): TResponse {
+    private async formatResponse(response: any): Promise<TResponse> {
         if (this.responseFormatter) {
+            const state = await this.getState();
             return this.responseFormatter(response, state);
         }
         return response as unknown as TResponse;
