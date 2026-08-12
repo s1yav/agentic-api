@@ -56,9 +56,26 @@ export class FlowServerComponent {
    * Gracefully stops the running server instance.
    */
   public async stop(): Promise<void> {
-    if (this.serverInstance) {
-      await stopServerInstance(this.serverInstance);
-      this.serverInstance = null;
+    if (!this.serverInstance) {
+      return;
+    }
+
+    await this.stopServerInstance();
+    this.serverInstance = null;
+  }
+
+  private async stopServerInstance(): Promise<void> {
+    const inst = this.serverInstance as any;
+    if (!inst) {
+      return;
+    }
+
+    if (typeof inst.stop === 'function') {
+      await inst.stop();
+    } else if (typeof inst.close === 'function') {
+      await new Promise<void>((res) => inst.close(() => res()));
+    } else if (inst.server && typeof inst.server.close === 'function') {
+      await new Promise<void>((res) => inst.server.close(() => res()));
     }
   }
 
@@ -75,21 +92,6 @@ export class FlowServerComponent {
 
   private logServerStart(): void {
     console.log(`[${this.args.agentName}] Flow server running on port ${this.args.port}`);
-  }
-}
-
-async function stopServerInstance(serverInstance: unknown): Promise<void> {
-  const inst = serverInstance as any;
-  if (!inst) {
-    return;
-  }
-
-  if (typeof inst.stop === 'function') {
-    await inst.stop();
-  } else if (typeof inst.close === 'function') {
-    await new Promise<void>((res) => inst.close(() => res()));
-  } else if (inst.server && typeof inst.server.close === 'function') {
-    await new Promise<void>((res) => inst.server.close(() => res()));
   }
 }
 
