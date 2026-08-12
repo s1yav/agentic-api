@@ -12,7 +12,7 @@ type FlowInput = Parameters<typeof withFlowOptions>[0];
 type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
 
 export interface HttpRequest {
-  headers: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
 }
 
 export interface FlowServerOptions {
@@ -54,12 +54,30 @@ export function createFlowServer(options: FlowServerOptions): ReturnType<typeof 
 }
 
 function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
-  return Array.isArray(flows) ? (flows as FlowInput[]) : (Object.values(flows) as FlowInput[]);
+  if (!flows) {
+    return [];
+  }
+  return Array.isArray(flows) ? flows : (Object.values(flows) as FlowInput[]);
 }
 
 function applyAuthenticationOptionsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
   const flowOptions = { contextProvider: buildAuthContext };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
+}
+
+function buildCorsOptions(
+  origin: string = DEFAULT_CORS_ORIGIN,
+  allowedHeaders: string[] = DEFAULT_CORS_HEADERS
+): CorsOptions {
+  return {
+    origin,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders,
+  };
+}
+
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
 
 async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
@@ -70,7 +88,7 @@ async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }
 
 function extractAppCheckToken(req: HttpRequest): string {
   const headerKey = APP_CHECK_HEADER.toLowerCase();
-  const token = req.headers?.[headerKey] || req.headers?.[APP_CHECK_HEADER];
+  const token = req?.headers?.[headerKey] || req?.headers?.[APP_CHECK_HEADER];
   const tokenValue = Array.isArray(token) ? token[0] : token;
 
   if (!tokenValue) {
@@ -87,21 +105,4 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
     const reason = error instanceof Error ? error.message : String(error);
     throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
-}
-
-function buildCorsOptions(customOrigin?: string, customHeaders?: string[]): CorsOptions {
-  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
-  const allowedHeaders = customHeaders
-    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
-    : DEFAULT_CORS_HEADERS;
-
-  return {
-    origin,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
