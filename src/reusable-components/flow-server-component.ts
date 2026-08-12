@@ -24,6 +24,8 @@ export interface FlowServerOptions {
   autoStartLog?: boolean;
 }
 
+export type FlowServerArgs = FlowServerOptions;
+
 interface CorsOptions {
   origin: string;
   methods: string[];
@@ -65,23 +67,6 @@ function applyAuthenticationOptionsToFlows(flows: FlowInput[]): ReturnType<typeo
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-function buildCorsOptions(customOrigin?: string, customHeaders?: string[]): CorsOptions {
-  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
-  const allowedHeaders = customHeaders
-    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
-    : DEFAULT_CORS_HEADERS;
-
-  return {
-    origin,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
-}
-
 async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
   const token = extractAppCheckToken(req);
   const claims = await verifyAppCheckToken(token);
@@ -107,4 +92,21 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
     const reason = error instanceof Error ? error.message : String(error);
     throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
+}
+
+function buildCorsOptions(customOrigin?: string, customHeaders?: string[]): CorsOptions {
+  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
+  const allowedHeaders = customHeaders
+    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
+    : DEFAULT_CORS_HEADERS;
+
+  return {
+    origin,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders,
+  };
+}
+
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
