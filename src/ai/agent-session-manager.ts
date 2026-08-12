@@ -296,7 +296,7 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         }
 
         if (this.responseFormatter) {
-            return this.responseFormatter(response, state);
+            return this.responseFormatter(response);
         }
 
         return response as unknown as TResponse;
@@ -329,9 +329,8 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
      * @returns A promise resolving to true once the session is cleared.
      */
     async clearSession(): Promise<boolean> {
-        const sessionId = this.auth.uid;
-        if (await this.sessionStore.has(sessionId)) {
-            await this.sessionStore.clear(sessionId);
+        if (await this.checkSessionStoreHasSession()) {
+            await this.clearSessionFromSessionStore();
         }
         this.state = undefined;
         return true;
@@ -349,18 +348,48 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         if (this.state) {
             return this.state;
         }
-        const sessionId = this.auth.uid;
 
-        if (await this.sessionStore.has(sessionId)) {
-            this.state = await this.sessionStore.get(sessionId);
+        if (await this.checkSessionStoreHasSession()) {
+            this.state = await this.getStateFromExistingSession();
         }
 
         if (!this.state) {
-            this.state = { ...this.initialState };
-            await this.sessionStore.set(sessionId, this.state);
+            await this.initializeAndSetStateInSessionStore();
         }
 
         return this.state;
+    }
+
+    private async checkSessionStoreHasSession(): Promise<boolean> {
+        const sessionId = this.getSessionId();
+        return await this.sessionStore.has(sessionId);
+    }
+
+    private async clearSessionFromSessionStore(): Promise<void> {
+        const sessionId = this.getSessionId();
+        await this.sessionStore.clear(sessionId);
+    }
+
+    private async initializeAndSetStateInSessionStore(): Promise<void> {
+        this.initializeState();
+        await this.setStateInSessionStore();
+    }
+
+    private initializeState(): void {
+        this.state = { ...this.initialState };
+    }
+
+    private async setStateInSessionStore(): Promise<void> {
+        const sessionId = this.getSessionId();
+        const state = this.state;
+        if (state) {
+            await this.sessionStore.set(sessionId, state);
+        }
+    }
+
+    private async getStateFromExistingSession(): Promise<S | undefined> {
+        const sessionId = this.getSessionId();
+        return await this.sessionStore.get(sessionId);
     }
 
     private getSessionId(): string {
