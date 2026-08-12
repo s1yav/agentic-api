@@ -1,4 +1,4 @@
-import { createFlowServer } from '../components/flow-server-component';
+import { createAgentFlowServer } from '../components/flow-server-component';
 import { PORT } from './product-manager-agent';
 import { summarizeProduct } from './flows/summarize-product';
 import { explainProductFeature } from './flows/explain-product-feature';
@@ -10,7 +10,7 @@ export const productManagerFlows = {
   gatherProductContext,
 } as const;
 
-export const server = createFlowServer({
+export const server = createAgentFlowServer({
   agentName: 'Product Manager Agent',
   port: Number(PORT),
   flows: productManagerFlows,

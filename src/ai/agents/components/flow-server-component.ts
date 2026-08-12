@@ -9,12 +9,13 @@ const DEFAULT_CORS_METHODS = ['POST', 'OPTIONS'];
 const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
+type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
 
 export interface HttpRequest {
   headers: Record<string, string | string[] | undefined>;
 }
 
-export interface FlowServerOptions {
+export interface AgentFlowServerOptions {
   agentName: string;
   port: number;
   flows: Record<string, unknown> | FlowInput[];
@@ -28,7 +29,7 @@ export interface FlowServerOptions {
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function createFlowServer(options: FlowServerOptions) {
+export function createAgentFlowServer(options: AgentFlowServerOptions) {
   const flowList = normalizeFlows(options.flows);
   const configuredFlows = configureFlows(flowList);
   const cors = buildCorsOptions(options.corsOrigin, options.allowedHeaders);
@@ -36,7 +37,7 @@ export function createFlowServer(options: FlowServerOptions) {
   const server = startFlowServer({
     port: options.port,
     cors,
-    flows: configuredFlows,
+    flows: configuredFlows as ServerFlows,
   });
 
   if (options.autoStartLog ?? true) {
