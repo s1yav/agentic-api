@@ -247,11 +247,8 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         mediaUrl?: string,
         contentType?: string
     ): Promise<TResponse> {
-        const parts: Part[] = [{ text: inputText }];
-        if (mediaUrl && contentType) {
-            parts.push({ media: { url: mediaUrl, contentType } });
-        }
-        return this.sendChat(parts);
+        const messageParts = this.constructChatParts(inputText, mediaUrl, contentType);
+        return this.sendChat(messageParts);
     }
 
     /**
@@ -420,6 +417,26 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
             return this.responseFormatter(response, state);
         }
         return response as unknown as TResponse;
+    }
+
+    private constructChatParts(
+        inputText: string,
+        mediaUrl?: string,
+        contentType?: string
+    ): Part[] {
+        const parts: Part[] = [{ text: inputText }];
+        if (this.hasMediaAttachment(mediaUrl, contentType)) {
+            parts.push(this.constructMediaPart(mediaUrl!, contentType!));
+        }
+        return parts;
+    }
+
+    private hasMediaAttachment(mediaUrl?: string, contentType?: string): boolean {
+        return Boolean(mediaUrl && contentType);
+    }
+
+    private constructMediaPart(mediaUrl: string, contentType: string): Part {
+        return { media: { url: mediaUrl, contentType } };
     }
 
     private getSessionId(): string {
