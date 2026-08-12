@@ -4,7 +4,9 @@ import {
   AgentExecutionError,
   AgenticApiError,
   ERROR_CODES,
+  ErrorCode,
   HTTP_STATUS,
+  HttpStatusCode,
   MissingHeaderError,
   NotFoundError,
   UnauthorizedError,
@@ -14,8 +16,8 @@ import {
 describe('Errors Module Unit Tests', () => {
   describe('AgenticApiError (Base Class)', () => {
     class ConcreteTestError extends AgenticApiError {
-      readonly statusCode = HTTP_STATUS.BAD_REQUEST;
-      readonly code = 'TEST_ERROR';
+      readonly httpStatus: HttpStatusCode = HTTP_STATUS.BAD_REQUEST;
+      readonly errorCode: ErrorCode = 'VALIDATION_ERROR';
     }
 
     it('should set error name and maintain prototype chain', () => {
@@ -33,8 +35,8 @@ describe('Errors Module Unit Tests', () => {
       assert.deepStrictEqual(response, {
         error: {
           message: 'Base error occurred',
-          code: 'TEST_ERROR',
-          statusCode: 400,
+          errorCode: 'VALIDATION_ERROR',
+          httpStatus: 400,
         },
       });
     });
@@ -46,8 +48,8 @@ describe('Errors Module Unit Tests', () => {
       assert.deepStrictEqual(response, {
         error: {
           message: 'Base error with details',
-          code: 'TEST_ERROR',
-          statusCode: 400,
+          errorCode: 'VALIDATION_ERROR',
+          httpStatus: 400,
           details: { field: 'username', issue: 'invalid' },
         },
       });
@@ -57,8 +59,8 @@ describe('Errors Module Unit Tests', () => {
   describe('UnauthorizedError', () => {
     it('should have default message and correct properties', () => {
       const err = new UnauthorizedError();
-      assert.strictEqual(err.statusCode, HTTP_STATUS.UNAUTHORIZED);
-      assert.strictEqual(err.code, ERROR_CODES.UNAUTHORIZED);
+      assert.strictEqual(err.httpStatus, HTTP_STATUS.UNAUTHORIZED);
+      assert.strictEqual(err.errorCode, ERROR_CODES.UNAUTHORIZED);
       assert.strictEqual(err.message, 'Unauthorized access');
       assert.strictEqual(err.details, undefined);
     });
@@ -74,8 +76,8 @@ describe('Errors Module Unit Tests', () => {
   describe('MissingHeaderError', () => {
     it('should construct message with headerName and include headerName in details', () => {
       const err = new MissingHeaderError('X-Firebase-AppCheck');
-      assert.strictEqual(err.statusCode, HTTP_STATUS.BAD_REQUEST);
-      assert.strictEqual(err.code, ERROR_CODES.MISSING_HEADER);
+      assert.strictEqual(err.httpStatus, HTTP_STATUS.BAD_REQUEST);
+      assert.strictEqual(err.errorCode, ERROR_CODES.MISSING_HEADER);
       assert.strictEqual(err.message, "Required header 'X-Firebase-AppCheck' is missing");
       assert.deepStrictEqual(err.details, { headerName: 'X-Firebase-AppCheck' });
     });
@@ -92,8 +94,8 @@ describe('Errors Module Unit Tests', () => {
   describe('ValidationError', () => {
     it('should have default message and correct properties', () => {
       const err = new ValidationError();
-      assert.strictEqual(err.statusCode, HTTP_STATUS.UNPROCESSABLE_ENTITY);
-      assert.strictEqual(err.code, ERROR_CODES.VALIDATION_ERROR);
+      assert.strictEqual(err.httpStatus, HTTP_STATUS.UNPROCESSABLE_ENTITY);
+      assert.strictEqual(err.errorCode, ERROR_CODES.VALIDATION_ERROR);
       assert.strictEqual(err.message, 'Validation failed');
     });
 
@@ -108,8 +110,8 @@ describe('Errors Module Unit Tests', () => {
   describe('NotFoundError', () => {
     it('should have default message and correct properties', () => {
       const err = new NotFoundError();
-      assert.strictEqual(err.statusCode, HTTP_STATUS.NOT_FOUND);
-      assert.strictEqual(err.code, ERROR_CODES.NOT_FOUND);
+      assert.strictEqual(err.httpStatus, HTTP_STATUS.NOT_FOUND);
+      assert.strictEqual(err.errorCode, ERROR_CODES.NOT_FOUND);
       assert.strictEqual(err.message, 'Resource not found');
     });
 
@@ -123,8 +125,8 @@ describe('Errors Module Unit Tests', () => {
   describe('AgentExecutionError', () => {
     it('should have default message and correct properties', () => {
       const err = new AgentExecutionError();
-      assert.strictEqual(err.statusCode, HTTP_STATUS.INTERNAL_SERVER_ERROR);
-      assert.strictEqual(err.code, ERROR_CODES.AGENT_EXECUTION_ERROR);
+      assert.strictEqual(err.httpStatus, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      assert.strictEqual(err.errorCode, ERROR_CODES.AGENT_EXECUTION_ERROR);
       assert.strictEqual(err.message, 'Agent execution failed');
     });
 

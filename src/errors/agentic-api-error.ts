@@ -1,8 +1,10 @@
+import { ErrorCode, HttpStatusCode } from './constants';
+
 export interface ClientErrorPayload {
   error: {
     message: string;
-    code: string;
-    statusCode: number;
+    errorCode: string;
+    httpStatus: number;
     details?: Record<string, unknown>;
   };
 }
@@ -11,11 +13,11 @@ export interface ClientErrorPayload {
  * Abstract Base Custom Error for agentic-api following the Open/Closed Principle (OCP).
  *
  * Closed for modification: Core error properties and serialization interface are fixed.
- * Open for extension: New domain errors extend this class and define `code`, `statusCode`, or custom details.
+ * Open for extension: New domain errors extend this class and define `errorCode`, `httpStatus`, or custom details.
  */
 export abstract class AgenticApiError extends Error {
-  abstract readonly statusCode: number;
-  abstract readonly code: string;
+  abstract readonly httpStatus: HttpStatusCode;
+  abstract readonly errorCode: ErrorCode;
 
   constructor(message: string, public readonly details?: Record<string, unknown>) {
     super(message);
@@ -30,8 +32,8 @@ export abstract class AgenticApiError extends Error {
     return {
       error: {
         message: this.message,
-        code: this.code,
-        statusCode: this.statusCode,
+        errorCode: this.errorCode,
+        httpStatus: this.httpStatus,
         ...(this.details && { details: this.details }),
       },
     };
