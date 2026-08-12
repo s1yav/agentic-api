@@ -43,7 +43,7 @@ export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGe
 }
 
 function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOptions {
-  const flows = prepareAuthenticatedFlows(args.flows);
+  const flows = getAuthenticatedFlows(args.flows);
   const cors = buildCorsArgs();
 
   return {
@@ -53,7 +53,7 @@ function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOpt
   };
 }
 
-function prepareAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
+function getAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
   const flowList = convertFlowsInputToList(flows);
   return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
 }
