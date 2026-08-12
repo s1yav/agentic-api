@@ -1,4 +1,4 @@
-import { startFlowServer as startGenkitExpressServer, withFlowOptions } from '@genkit-ai/express';
+import { startFlowServer as startGenkitFlowServer, withFlowOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { MissingHeaderError, UnauthorizedError } from '../errors';
 
@@ -9,7 +9,7 @@ const DEFAULT_CORS_METHODS = ['POST', 'OPTIONS'];
 const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
-type ServerFlows = Parameters<typeof startGenkitExpressServer>[0]['flows'];
+type ServerFlows = Parameters<typeof startGenkitFlowServer>[0]['flows'];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -35,12 +35,12 @@ interface CorsArgs {
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitExpressServer> {
+export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitFlowServer> {
   const flowList = convertFlowsInputToList(args.flows);
   const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
   const cors = buildCorsArgs(args.corsOrigin, args.allowedHeaders);
 
-  const server = startGenkitExpressServer({
+  const server = startGenkitFlowServer({
     port: args.port,
     cors,
     flows: authenticatedFlows as ServerFlows,
