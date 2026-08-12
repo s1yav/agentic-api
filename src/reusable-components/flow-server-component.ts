@@ -10,7 +10,7 @@ const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER]
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
 type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
-type GenkitFlowServerOptions = Parameters<typeof startFlowServer>[0];
+type FlowServerOptions = Parameters<typeof startFlowServer>[0];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -44,7 +44,7 @@ export class FlowServerComponent {
    * Starts the secure Express Flow Server instance.
    */
   public start(): ReturnType<typeof startFlowServer> {
-    const options = buildGenkitFlowServerOptions(this.args);
+    const options = buildFlowServerOptions(this.args);
     this.serverInstance = startFlowServer(options);
 
     logServerStart(this.args.agentName, this.args.port);
@@ -78,7 +78,7 @@ async function stopServerInstance(serverInstance: unknown): Promise<void> {
   }
 }
 
-function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOptions {
+function buildFlowServerOptions(args: FlowServerArgs): FlowServerOptions {
   const flows = getAuthenticatedFlows(args.flows);
   const cors = buildCorsArgs();
 
