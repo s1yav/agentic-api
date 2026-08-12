@@ -1,12 +1,12 @@
 import { AgenticOrchestrator, Agent } from './index';
-import { AgentSessionManager, ISessionStore } from './ai/agent-session-manager';
+import { AgentSessionManager, SessionStore } from './ai/agent-session-manager';
 import { getGithubReadmeTool } from './ai/agents/product-manager-agent/product-manager-tools';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
  * In-Memory Session Store implementation for local testing.
  */
-class InMemorySessionStore<S> implements ISessionStore<S> {
+class InMemorySessionStore<S> implements SessionStore<S> {
   private store = new Map<string, S>();
 
   async has(sessionId: string): Promise<boolean> {

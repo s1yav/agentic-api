@@ -23,7 +23,15 @@ export interface ChatInput {
  *
  * @template S The shape of the state stored within the session store.
  */
-export interface ISessionStore<S> {
+/**
+ * Contract interface or API contract for session storage backends (e.g. Firestore, Redis, Memory).
+ * 
+ * Provides an abstraction layer for reading, writing, checking existence, and clearing
+ * persistent agent session state bound to user session IDs.
+ *
+ * @template S The shape of the state stored within the session store.
+ */
+export interface SessionStore<S> {
     /**
      * Checks whether a session state entry exists in the storage backend for the given session ID.
      *
@@ -67,7 +75,7 @@ export interface ISessionStore<S> {
  *
  * @template S The shape of the agent's session state.
  */
-export interface IContextProvider<S> {
+export interface ContextProvider<S> {
     /**
      * Generates a context dictionary to pass into agent execution options.
      *
@@ -88,7 +96,7 @@ export interface IContextProvider<S> {
  * @template S The shape of the agent's session state.
  * @template TResponse The type of the final response delivered back to the client application.
  */
-export interface IInterruptHandler<S, TResponse> {
+export interface InterruptHandler<S, TResponse> {
     /**
      * Processes raw tool interrupts yielded by the LLM agent during execution.
      *
@@ -123,7 +131,7 @@ export interface IInterruptHandler<S, TResponse> {
  * @template S The shape of the session state.
  * @template TResponse The type of response returned to the client.
  */
-export interface IAgentSessionManager<S, TResponse> {
+export interface SessionManager<S, TResponse> {
     /**
      * Convenience method to send a text prompt with optional media attachment.
      *
@@ -180,17 +188,17 @@ export interface AgentSessionManagerArgs<S, TResponse> {
     /** The decoded Firebase authentication token representing the current user. */
     auth: DecodedIdToken;
 
-    /** Implementation of `ISessionStore` for state persistence (e.g. Firestore, Redis). */
-    sessionStore: ISessionStore<S>;
+    /** Implementation of `SessionStore` for state persistence (e.g. Firestore, Redis). */
+    sessionStore: SessionStore<S>;
 
     /** Default state object initialized when a user creates a new session. */
     initialState: S;
 
     /** Optional strategy provider to build dynamic context injected into agent calls. */
-    contextProvider?: IContextProvider<S>;
+    contextProvider?: ContextProvider<S>;
 
     /** Optional strategy handler to process and resume human-in-the-loop tool calls. */
-    interruptHandler?: IInterruptHandler<S, TResponse>;
+    interruptHandler?: InterruptHandler<S, TResponse>;
 
     /** Optional formatter function to map raw agent outputs into `TResponse`. */
     responseFormatter?: (response: any, state?: S) => TResponse;
@@ -204,14 +212,14 @@ export interface AgentSessionManagerArgs<S, TResponse> {
  * 
  * **Key Architectural Features:**
  * - **Typed State (`S`)**: Accommodates any domain state shape without subclasses.
- * - **Strategy Injection**: Accepts pluggable `ISessionStore`, `IContextProvider`, and `IInterruptHandler` instances.
+ * - **Strategy Injection**: Accepts pluggable `SessionStore`, `ContextProvider`, and `InterruptHandler` instances.
  * - **Decoupled Agent Runner**: Invokes AI agents via a function runner instead of hardcoded agent classes.
  *
  * @template S The shape of the session state stored in the session store.
  * @template TResponse The type of response returned to the caller.
  */
 export class AgentSessionManager<S extends Record<string, any>, TResponse>
-    implements IAgentSessionManager<S, TResponse> {
+    implements SessionManager<S, TResponse> {
     /** Cached in-memory copy of the active session state for the current instance lifecycle. */
     private state?: S;
 
@@ -220,10 +228,10 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         options: Record<string, unknown>
     ) => Promise<any>;
     private readonly auth: DecodedIdToken;
-    private readonly sessionStore: ISessionStore<S>;
+    private readonly sessionStore: SessionStore<S>;
     private readonly initialState: S;
-    private readonly contextProvider?: IContextProvider<S>;
-    private readonly interruptHandler?: IInterruptHandler<S, TResponse>;
+    private readonly contextProvider?: ContextProvider<S>;
+    private readonly interruptHandler?: InterruptHandler<S, TResponse>;
     private readonly responseFormatter?: (response: any, state?: S) => TResponse;
 
     /**

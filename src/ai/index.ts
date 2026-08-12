@@ -3,10 +3,10 @@ import {
   AgentSessionManager,
   AgentSessionManagerArgs,
   ChatInput,
-  IAgentSessionManager,
-  ISessionStore,
-  IContextProvider,
-  IInterruptHandler,
+  SessionManager,
+  SessionStore,
+  ContextProvider,
+  InterruptHandler,
 } from './agent-session-manager';
 
 export {
@@ -14,8 +14,8 @@ export {
   AgentSessionManager,
   AgentSessionManagerArgs,
   ChatInput,
-  IAgentSessionManager,
-  ISessionStore,
-  IContextProvider,
-  IInterruptHandler,
+  SessionManager,
+  SessionStore,
+  ContextProvider,
+  InterruptHandler,
 };
