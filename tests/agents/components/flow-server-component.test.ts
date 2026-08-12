@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { createAgentFlowServer } from '../../../src/ai/agents/components/flow-server-component';
+import { createFlowServer } from '../../../src/ai/agents/components/flow-server-component';
 import { summarizeProduct } from '../../../src/ai/agents/product-manager-agent/flows/summarize-product';
 
 describe('Flow Server Component Unit Tests', () => {
-  it('should create an agent flow server instance with flows as an object map', async () => {
-    const serverInstance = createAgentFlowServer({
+  it('should create a flow server instance with flows as an object map', async () => {
+    const serverInstance = createFlowServer({
       agentName: 'Test Product Manager Agent',
       port: 3999,
       flows: { summarizeProduct },
@@ -16,8 +16,8 @@ describe('Flow Server Component Unit Tests', () => {
     await closeServer(serverInstance);
   });
 
-  it('should create an agent flow server instance with flows as an array', async () => {
-    const serverInstance = createAgentFlowServer({
+  it('should create a flow server instance with flows as an array', async () => {
+    const serverInstance = createFlowServer({
       agentName: 'Test Product Manager Agent Array',
       port: 3998,
       flows: [summarizeProduct as any],
@@ -39,4 +39,3 @@ async function closeServer(serverInstance: unknown): Promise<void> {
     await new Promise<void>((res) => inst.server.close(() => res()));
   }
 }
-

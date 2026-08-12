@@ -15,7 +15,7 @@ export interface HttpRequest {
   headers: Record<string, string | string[] | undefined>;
 }
 
-export interface AgentFlowServerOptions {
+export interface FlowServerOptions {
   agentName: string;
   port: number;
   flows: Record<string, unknown> | FlowInput[];
@@ -29,7 +29,7 @@ export interface AgentFlowServerOptions {
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function createAgentFlowServer(options: AgentFlowServerOptions) {
+export function createFlowServer(options: FlowServerOptions) {
   const flowList = normalizeFlows(options.flows);
   const configuredFlows = configureFlows(flowList);
   const cors = buildCorsOptions(options.corsOrigin, options.allowedHeaders);
