@@ -1,4 +1,4 @@
-import { startFlowServer, withFlowOptions } from '@genkit-ai/express';
+import { startFlowServer, withFlowOptions, type FlowServerOptions, type FlowWithOptions } from '@genkit-ai/express';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { MissingHeaderError, UnauthorizedError } from '../errors';
 
@@ -8,10 +8,6 @@ const DEFAULT_CORS_ORIGIN = '*';
 const DEFAULT_CORS_METHODS = ['POST', 'OPTIONS'];
 const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER];
 
-type FlowInput = Parameters<typeof withFlowOptions>[0];
-type ServerFlows = Parameters<typeof startFlowServer>[0]['flows'];
-type FlowServerOptions = Parameters<typeof startFlowServer>[0];
-
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
 }
@@ -19,7 +15,7 @@ export interface HttpRequest {
 export interface FlowServerArgs {
   agentName: string;
   port: number;
-  flows: Record<string, unknown> | FlowInput[];
+  flows: Record<string, unknown> | any[];
 }
 
 interface CorsArgs {
@@ -90,17 +86,17 @@ export class FlowServerComponent {
     };
   }
 
-  private getAuthenticatedFlows(): ServerFlows {
-    const flowList = this.getFlowInput();
-    return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
+  private getAuthenticatedFlows(): FlowWithOptions[] {
+    const rawFlows = this.getFlowInput();
+    return applyAuthenticationArgsToFlows(rawFlows);
   }
 
-  private getFlowInput(): FlowInput[] {
+  private getFlowInput(): any[] {
     const flows = this.args.flows;
     if (!flows) {
       return [];
     }
-    return Array.isArray(flows) ? flows : (Object.values(flows) as FlowInput[]);
+    return Array.isArray(flows) ? flows : Object.values(flows);
   }
 
   private logServerStart(): void {
@@ -116,7 +112,7 @@ function buildCorsArgs(): CorsArgs {
   };
 }
 
-function applyAuthenticationArgsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
+function applyAuthenticationArgsToFlows(flows: any[]): FlowWithOptions[] {
   const flowOptions = { contextProvider: buildAuthContext };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
