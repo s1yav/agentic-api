@@ -1,15 +1,13 @@
+import { resolve } from 'node:path';
 import { genkit } from 'genkit/beta';
 import { enableGoogleCloudTelemetry } from '@genkit-ai/google-cloud';
 import { vertexAI } from '@genkit-ai/google-genai';
 
-// Enable remote telemetry collection when running in production.
-if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'dev') {
-    console.log('[Production environment] Enabling Google Cloud Telemetry.');
-    enableGoogleCloudTelemetry();
-};
+const DEFAULT_VERTEX_LOCATION = 'us-central1';
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+const PROMPTS_DIRECTORY = 'prompts';
 
-// Configure safety settings. Block all categories with low scores and above.
-const geminiSafetySettings = [
+const GEMINI_SAFETY_SETTINGS = [
     {
         category: 'HARM_CATEGORY_HATE_SPEECH',
         threshold: 'BLOCK_LOW_AND_ABOVE',
@@ -28,11 +26,20 @@ const geminiSafetySettings = [
     },
 ] as const;
 
+initializeTelemetry();
+
 export const ai = genkit({
-    // Enable the Vertex AI plugin.
-    plugins: [vertexAI({ location: 'us-central1', })],
-    // Select a Gemini model and set the safety settings.
-    model: vertexAI.model('gemini-2.5-flash').withConfig({
-        safetySettings: [...geminiSafetySettings],
+    promptDir: resolve(process.cwd(), PROMPTS_DIRECTORY),
+    plugins: [vertexAI({ location: DEFAULT_VERTEX_LOCATION })],
+    model: vertexAI.model(DEFAULT_GEMINI_MODEL).withConfig({
+        safetySettings: [...GEMINI_SAFETY_SETTINGS],
     }),
 });
+
+function initializeTelemetry(): void {
+    const environment = process.env.NODE_ENV;
+    if (environment === 'production' || environment === 'dev') {
+        console.log(`[${environment} environment] Enabling Google Cloud Telemetry.`);
+        enableGoogleCloudTelemetry();
+    }
+}
