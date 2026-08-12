@@ -44,10 +44,10 @@ export class FlowServerComponent {
    * Starts the secure Express Flow Server instance.
    */
   public start(): ReturnType<typeof startFlowServer> {
-    const options = buildFlowServerOptions(this.args);
+    const options = this.buildOptions();
     this.serverInstance = startFlowServer(options);
 
-    logServerStart(this.args.agentName, this.args.port);
+    this.logServerStart();
 
     return this.serverInstance;
   }
@@ -60,6 +60,21 @@ export class FlowServerComponent {
       await stopServerInstance(this.serverInstance);
       this.serverInstance = null;
     }
+  }
+
+  private buildOptions(): FlowServerOptions {
+    const flows = getAuthenticatedFlows(this.args.flows);
+    const cors = buildCorsArgs();
+
+    return {
+      port: this.args.port,
+      cors,
+      flows,
+    };
+  }
+
+  private logServerStart(): void {
+    console.log(`[${this.args.agentName}] Flow server running on port ${this.args.port}`);
   }
 }
 
@@ -76,21 +91,6 @@ async function stopServerInstance(serverInstance: unknown): Promise<void> {
   } else if (inst.server && typeof inst.server.close === 'function') {
     await new Promise<void>((res) => inst.server.close(() => res()));
   }
-}
-
-function buildFlowServerOptions(args: FlowServerArgs): FlowServerOptions {
-  const flows = getAuthenticatedFlows(args.flows);
-  const cors = buildCorsArgs();
-
-  return {
-    port: args.port,
-    cors,
-    flows,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
 }
 
 function getAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
