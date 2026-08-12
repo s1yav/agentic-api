@@ -10,7 +10,7 @@ const DEFAULT_CORS_HEADERS = ['Content-Type', 'Authorization', APP_CHECK_HEADER]
 
 type FlowInput = Parameters<typeof withFlowOptions>[0];
 type ServerFlows = Parameters<typeof startGenkitFlowServer>[0]['flows'];
-type FlowServerOptions = Parameters<typeof startGenkitFlowServer>[0];
+type GenkitFlowServerOptions = Parameters<typeof startGenkitFlowServer>[0];
 
 export interface HttpRequest {
   headers?: Record<string, string | string[] | undefined>;
@@ -34,7 +34,7 @@ interface CorsArgs {
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
 export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGenkitFlowServer> {
-  const options = buildFlowServerOptions(args);
+  const options = buildGenkitFlowServerOptions(args);
   const server = startGenkitFlowServer(options);
 
   logServerStart(args.agentName, args.port);
@@ -42,7 +42,7 @@ export function startFlowServer(args: FlowServerArgs): ReturnType<typeof startGe
   return server;
 }
 
-function buildFlowServerOptions(args: FlowServerArgs): FlowServerOptions {
+function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOptions {
   const flowList = convertFlowsInputToList(args.flows);
   const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
   const cors = buildCorsArgs();
