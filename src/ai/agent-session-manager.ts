@@ -2,6 +2,20 @@ import { Part } from 'genkit/beta';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
+ * Input payload interface for chat interaction methods.
+ */
+export interface ChatInput {
+    /** The user's input text message. */
+    inputText: string;
+
+    /** Optional HTTP or Cloud Storage URL of an attached media asset. */
+    mediaUrl?: string;
+
+    /** Optional MIME type of the attached media asset (e.g. 'image/png'). */
+    contentType?: string;
+}
+
+/**
  * Contract interface or API contract for session storage backends (e.g. Firestore, Redis, Memory).
  * 
  * Provides an abstraction layer for reading, writing, checking existence, and clearing
@@ -111,14 +125,12 @@ export interface IInterruptHandler<S, TResponse> {
  */
 export interface IAgentSessionManager<S, TResponse> {
     /**
-     * Convenience method to send a text prompt with optional media attachment (image/video URL).
+     * Convenience method to send a text prompt with optional media attachment.
      *
-     * @param inputText The user's message text.
-     * @param mediaUrl Optional public URL or Cloud Storage URI of attached media.
-     * @param contentType Optional MIME type of the attached media (e.g., 'image/png').
+     * @param input ChatInput payload or raw text message string.
      * @returns A promise resolving to the agent's formatted response.
      */
-    chat(inputText: string, mediaUrl?: string, contentType?: string): Promise<TResponse>;
+    chat(input: ChatInput | string): Promise<TResponse>;
 
     /**
      * Low-level method to execute a chat turn with structured prompt parts and custom execution options.
@@ -153,9 +165,6 @@ export interface IAgentSessionManager<S, TResponse> {
 }
 
 /**
- * Interface-based composable Agent Session Manager implementation.
- * 
- * This class decouples agent execution logic from storage mechanisms, context/**
  * Configuration options interface for initializing an AgentSessionManager instance.
  *
  * @template S The shape of the session state stored in the session store.
@@ -233,21 +242,16 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
     }
 
     /**
-     * Sends a chat message with optional multimodal media attachment (such as images or audio files).
+     * Sends a chat message with optional multimodal media attachment.
      * 
      * Constructs Genkit `Part` structures for text and media input before delegating execution to `sendChat`.
      *
-     * @param inputText The user's input text message.
-     * @param mediaUrl Optional HTTP or Cloud Storage URL of the media asset.
-     * @param contentType Optional MIME type of the media asset (e.g., 'image/jpeg').
+     * @param input ChatInput payload object or raw message string.
      * @returns A promise resolving to the final formatted response payload (`TResponse`).
      */
-    async chat(
-        inputText: string,
-        mediaUrl?: string,
-        contentType?: string
-    ): Promise<TResponse> {
-        const messageParts = this.constructChatParts(inputText, mediaUrl, contentType);
+    async chat(input: ChatInput | string): Promise<TResponse> {
+        const chatInput = typeof input === 'string' ? { inputText: input } : input;
+        const messageParts = this.constructChatParts(chatInput);
         return this.sendChat(messageParts);
     }
 
@@ -419,14 +423,10 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         return response as unknown as TResponse;
     }
 
-    private constructChatParts(
-        inputText: string,
-        mediaUrl?: string,
-        contentType?: string
-    ): Part[] {
-        const parts: Part[] = [{ text: inputText }];
-        if (this.hasMediaAttachment(mediaUrl, contentType)) {
-            parts.push(this.constructMediaPart(mediaUrl!, contentType!));
+    private constructChatParts(input: ChatInput): Part[] {
+        const parts: Part[] = [{ text: input.inputText }];
+        if (this.hasMediaAttachment(input.mediaUrl, input.contentType)) {
+            parts.push(this.constructMediaPart(input.mediaUrl!, input.contentType!));
         }
         return parts;
     }

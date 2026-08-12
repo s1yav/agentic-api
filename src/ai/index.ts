@@ -2,6 +2,7 @@ import { ai } from './genkit';
 import {
   AgentSessionManager,
   AgentSessionManagerArgs,
+  ChatInput,
   IAgentSessionManager,
   ISessionStore,
   IContextProvider,
@@ -12,6 +13,7 @@ export {
   ai,
   AgentSessionManager,
   AgentSessionManagerArgs,
+  ChatInput,
   IAgentSessionManager,
   ISessionStore,
   IContextProvider,
