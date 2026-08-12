@@ -31,11 +31,11 @@ interface CorsArgs {
 }
 
 /**
- * Creates and configures a secure Express Flow Server for an Agent.
+ * Creates and starts a secure Express Flow Server for an Agent.
  *
  * Enforces Firebase App Check authentication, CORS policies, and flow options.
  */
-export function createFlowServer(args: FlowServerArgs): ReturnType<typeof startFlowServer> {
+export function createAndStartFlowServer(args: FlowServerArgs): ReturnType<typeof startFlowServer> {
   const flowList = convertFlowsInputToList(args.flows);
   const authenticatedFlows = applyAuthenticationArgsToFlows(flowList);
   const cors = buildCorsArgs(args.corsOrigin, args.allowedHeaders);
@@ -65,23 +65,6 @@ function applyAuthenticationArgsToFlows(flows: FlowInput[]): ReturnType<typeof w
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-function buildCorsArgs(customOrigin?: string, customHeaders?: string[]): CorsArgs {
-  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
-  const allowedHeaders = customHeaders
-    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
-    : DEFAULT_CORS_HEADERS;
-
-  return {
-    origin,
-    methods: DEFAULT_CORS_METHODS,
-    allowedHeaders,
-  };
-}
-
-function logServerStart(agentName: string, port: number): void {
-  console.log(`[${agentName}] Flow server running on port ${port}`);
-}
-
 async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
   const token = extractAppCheckToken(req);
   const claims = await verifyAppCheckToken(token);
@@ -108,3 +91,21 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
     throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
   }
 }
+
+function buildCorsArgs(customOrigin?: string, customHeaders?: string[]): CorsArgs {
+  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
+  const allowedHeaders = customHeaders
+    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
+    : DEFAULT_CORS_HEADERS;
+
+  return {
+    origin,
+    methods: DEFAULT_CORS_METHODS,
+    allowedHeaders,
+  };
+}
+
+function logServerStart(agentName: string, port: number): void {
+  console.log(`[${agentName}] Flow server running on port ${port}`);
+}
+
