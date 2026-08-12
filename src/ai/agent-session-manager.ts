@@ -273,33 +273,15 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         options: Record<string, unknown> = {}
     ): Promise<TResponse> {
         const state = await this.getState();
+        const executionOptions = this.buildExecutionOptions(options, state);
+        const rawResponse = await this.agentRunner(message, executionOptions);
 
-        const extraContext = this.contextProvider
-            ? this.contextProvider.getContext(this.auth, state)
-            : { auth: this.auth };
-
-        const executionOptions = {
-            ...options,
-            context: { ...((options.context as object) || {}), ...extraContext },
-        };
-
-        const response = await this.agentRunner(message, executionOptions);
-
-        if (response?.finishReason === 'interrupted' && this.interruptHandler && state) {
-            const interruptResponse = await this.interruptHandler.handleInterrupt(
-                response.interrupts || [],
-                state
-            );
-            if (interruptResponse) {
-                return interruptResponse;
-            }
+        const interruptResponse = await this.tryHandleInterrupt(rawResponse, state);
+        if (interruptResponse) {
+            return interruptResponse;
         }
 
-        if (this.responseFormatter) {
-            return this.responseFormatter(response);
-        }
-
-        return response as unknown as TResponse;
+        return this.formatResponse(rawResponse, state);
     }
 
     /**
@@ -312,14 +294,7 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
      * @returns A promise resolving to the agent's updated response after resuming tool execution.
      */
     async resumeInterrupt(confirmationData: unknown): Promise<TResponse> {
-        const state = await this.getState();
-        if (!this.interruptHandler || !state) {
-            return this.sendChat('');
-        }
-        const resumeOptions = this.interruptHandler.formatResumeOptions(
-            confirmationData,
-            state
-        );
+        const resumeOptions = await this.getResumeOptionsFromInterruptHandler(confirmationData);
         return this.sendChat('', resumeOptions);
     }
 
@@ -360,6 +335,14 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
         return this.state;
     }
 
+    private async getResumeOptionsFromInterruptHandler(confirmationData: unknown): Promise<Record<string, unknown>> {
+        const state = await this.getState();
+        if (!this.interruptHandler || !state) {
+            return {};
+        }
+        return this.interruptHandler.formatResumeOptions(confirmationData, state);
+    }
+
     private async checkSessionStoreHasSession(): Promise<boolean> {
         const sessionId = this.getSessionId();
         return await this.sessionStore.has(sessionId);
@@ -390,6 +373,51 @@ export class AgentSessionManager<S extends Record<string, any>, TResponse>
     private async getStateFromExistingSession(): Promise<S | undefined> {
         const sessionId = this.getSessionId();
         return await this.sessionStore.get(sessionId);
+    }
+
+    private buildExecutionOptions(
+        options: Record<string, unknown>,
+        state?: S
+    ): Record<string, unknown> {
+        const extraContext = this.buildExtraContext(state);
+        const initialContext = (options.context as object) || {};
+        return {
+            ...options,
+            context: { ...initialContext, ...extraContext },
+        };
+    }
+
+    private buildExtraContext(state?: S): Record<string, unknown> {
+        if (this.contextProvider) {
+            return this.contextProvider.getContext(this.auth, state);
+        }
+        return { auth: this.auth };
+    }
+
+    private async tryHandleInterrupt(
+        response: any,
+        state?: S
+    ): Promise<TResponse | undefined> {
+        if (!this.shouldHandleInterrupt(response, state)) {
+            return undefined;
+        }
+        const interrupts = response.interrupts || [];
+        return await this.interruptHandler!.handleInterrupt(interrupts, state!);
+    }
+
+    private shouldHandleInterrupt(response: any, state?: S): boolean {
+        return (
+            response?.finishReason === 'interrupted' &&
+            Boolean(this.interruptHandler) &&
+            Boolean(state)
+        );
+    }
+
+    private formatResponse(response: any, state?: S): TResponse {
+        if (this.responseFormatter) {
+            return this.responseFormatter(response, state);
+        }
+        return response as unknown as TResponse;
     }
 
     private getSessionId(): string {
