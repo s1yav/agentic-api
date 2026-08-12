@@ -54,11 +54,11 @@ function buildGenkitFlowServerOptions(args: FlowServerArgs): GenkitFlowServerOpt
 }
 
 function getAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
-  const flowList = convertFlowsInputToList(flows);
+  const flowList = getFlowInput(flows);
   return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
 }
 
-function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
+function getFlowInput(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
   if (!flows) {
     return [];
   }
