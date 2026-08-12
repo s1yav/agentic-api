@@ -80,7 +80,7 @@ export class FlowServerComponent {
   }
 
   private buildOptions(): FlowServerOptions {
-    const flows = getAuthenticatedFlows(this.args.flows);
+    const flows = this.getAuthenticatedFlows();
     const cors = buildCorsArgs();
 
     return {
@@ -90,14 +90,22 @@ export class FlowServerComponent {
     };
   }
 
+  private getAuthenticatedFlows(): ServerFlows {
+    const flowList = this.getFlowInput();
+    return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
+  }
+
+  private getFlowInput(): FlowInput[] {
+    const flows = this.args.flows;
+    if (!flows) {
+      return [];
+    }
+    return Array.isArray(flows) ? flows : (Object.values(flows) as FlowInput[]);
+  }
+
   private logServerStart(): void {
     console.log(`[${this.args.agentName}] Flow server running on port ${this.args.port}`);
   }
-}
-
-function getAuthenticatedFlows(flows: Record<string, unknown> | FlowInput[]): ServerFlows {
-  const flowList = getFlowInput(flows);
-  return applyAuthenticationArgsToFlows(flowList) as ServerFlows;
 }
 
 function buildCorsArgs(): CorsArgs {
@@ -106,13 +114,6 @@ function buildCorsArgs(): CorsArgs {
     methods: DEFAULT_CORS_METHODS,
     allowedHeaders: DEFAULT_CORS_HEADERS,
   };
-}
-
-function getFlowInput(flows: Record<string, unknown> | FlowInput[]): FlowInput[] {
-  if (!flows) {
-    return [];
-  }
-  return Array.isArray(flows) ? flows : (Object.values(flows) as FlowInput[]);
 }
 
 function applyAuthenticationArgsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
