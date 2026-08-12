@@ -9,7 +9,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from './index';
+} from '../../src/errors';
 
 describe('Errors Module Unit Tests', () => {
   describe('AgenticApiError (Base Class)', () => {
