@@ -2,12 +2,12 @@
   "name": "agentic-api",
   "version": "1.0.0",
   "description": "Multi-agent task orchestrator utilizing structured outputs and state graphs in TypeScript.",
-  "main": "dist/index.js",
+  "main": "dist/ai/index.js",
   "type": "commonjs",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "npm run build && node dist/example.js"
+    "start": "node dist/ai/index.js",
+    "test": "npm run build"
   },
   "repository": {
     "type": "git",
