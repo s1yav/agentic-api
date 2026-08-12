@@ -58,11 +58,11 @@ function convertFlowsInputToList(flows: Record<string, unknown> | FlowInput[]): 
 }
 
 function applyAuthenticationOptionsToFlows(flows: FlowInput[]): ReturnType<typeof withFlowOptions>[] {
-  const flowOptions = { contextProvider: authenticateRequest };
+  const flowOptions = { contextProvider: buildAuthContext };
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-async function authenticateRequest(req: HttpRequest): Promise<{ appCheck: unknown }> {
+async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
   const token = extractAppCheckToken(req);
   const claims = await verifyAppCheckToken(token);
   return { appCheck: claims };
@@ -89,10 +89,12 @@ async function verifyAppCheckToken(token: string): Promise<unknown> {
   }
 }
 
-function buildCorsOptions(
-  origin: string = DEFAULT_CORS_ORIGIN,
-  allowedHeaders: string[] = DEFAULT_CORS_HEADERS
-): CorsOptions {
+function buildCorsOptions(customOrigin?: string, customHeaders?: string[]): CorsOptions {
+  const origin = customOrigin ?? DEFAULT_CORS_ORIGIN;
+  const allowedHeaders = customHeaders
+    ? Array.from(new Set([...DEFAULT_CORS_HEADERS, ...customHeaders]))
+    : DEFAULT_CORS_HEADERS;
+
   return {
     origin,
     methods: DEFAULT_CORS_METHODS,
