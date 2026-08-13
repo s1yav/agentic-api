@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
+import { CLOUDRUNV2_SERVICE_COMPONENT_TYPE } from "../../constants";
 
 export interface ServiceArgs {
     /**
@@ -58,14 +59,14 @@ export interface ServiceArgs {
 
 /**
  * Service Component Resource
- * Provisions a Google Cloud Run v2 Service styled consistently with gitops component constructs.
+ * Provisions a Google Cloud Run v2 Service styled consistently with agentic-api constructs.
  */
 export class Service extends pulumi.ComponentResource {
     public readonly service: gcp.cloudrunv2.Service;
     public readonly uri: pulumi.Output<string>;
 
     constructor(name: string, args: ServiceArgs, opts?: pulumi.ComponentResourceOptions) {
-        super("custom:components:CloudRunv2Service", name, args, opts);
+        super(CLOUDRUNV2_SERVICE_COMPONENT_TYPE, name, args, opts);
 
         this.service = new gcp.cloudrunv2.Service(name, {
             name: args.serviceName,

@@ -1,0 +1,109 @@
+import * as pulumi from "@pulumi/pulumi";
+import * as gcp from "@pulumi/gcp";
+import { Account as ServiceAccount } from "../../../../constructs/serviceaccount/account";
+import {
+    PRODUCT_MANAGER_IDENTITY_TYPE,
+    PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
+    PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX,
+    DEFAULT_PM_AGENT_SA_DISPLAY_NAME,
+    OWNER_ROLE,
+} from "../../../../constants";
+
+export interface ProductManagerIdentityArgs {
+    /**
+     * The Google Cloud project ID.
+     */
+    projectId: pulumi.Input<string>;
+
+    /**
+     * The service account ID username. Defaults to "pm-agent-sa".
+     */
+    accountId?: pulumi.Input<string>;
+
+    /**
+     * The display name of the service account. Defaults to "Product Manager Agent Service Account".
+     */
+    displayName?: pulumi.Input<string>;
+
+    /**
+     * The GCP IAM role to bind to the project. Defaults to "roles/owner".
+     */
+    role?: pulumi.Input<string>;
+}
+
+interface ProductManagerIdentityOutputs {
+    serviceAccount: ServiceAccount;
+    serviceAccountEmail: pulumi.Output<string>;
+    iamMember: gcp.projects.IAMMember;
+}
+
+/**
+ * ProductManagerIdentity
+ * ComponentResource for creating the Product Manager Agent service account with permissions to run the container image.
+ */
+export class ProductManagerIdentity extends pulumi.ComponentResource {
+    public readonly serviceAccount: ServiceAccount;
+    public readonly serviceAccountEmail: pulumi.Output<string>;
+    public readonly iamMember: gcp.projects.IAMMember;
+    private readonly parentName: string;
+    private readonly parentArgs: ProductManagerIdentityArgs;
+
+    constructor(name: string, args: ProductManagerIdentityArgs, opts?: pulumi.ComponentResourceOptions) {
+        super(PRODUCT_MANAGER_IDENTITY_TYPE, name, args, opts);
+        this.parentName = name;
+        this.parentArgs = args;
+
+        this.serviceAccount = this.createAndRegisterServiceAccount();
+        this.serviceAccountEmail = this.serviceAccount.account.email;
+        this.iamMember = this.createAndRegisterIamMember();
+
+        const parentOutputs = this.constructParentOutputs();
+        this.registerOutputs(parentOutputs);
+    }
+
+    private createAndRegisterServiceAccount(): ServiceAccount {
+        const saResourceName = this.constructServiceAccountResourceName();
+        return new ServiceAccount(
+            saResourceName,
+            {
+                accountId: this.parentArgs.accountId ?? PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
+                displayName: this.parentArgs.displayName ?? DEFAULT_PM_AGENT_SA_DISPLAY_NAME,
+                project: this.parentArgs.projectId,
+            },
+            { parent: this }
+        );
+    }
+
+    private createAndRegisterIamMember(): gcp.projects.IAMMember {
+        const iamResourceName = this.constructIamMemberResourceName();
+        return new gcp.projects.IAMMember(
+            iamResourceName,
+            {
+                project: this.parentArgs.projectId,
+                role: this.parentArgs.role ?? OWNER_ROLE,
+                member: pulumi.interpolate`serviceAccount:${this.serviceAccountEmail}`,
+            },
+            { parent: this }
+        );
+    }
+
+    private constructParentOutputs(): ProductManagerIdentityOutputs {
+        return {
+            serviceAccount: this.serviceAccount,
+            serviceAccountEmail: this.serviceAccountEmail,
+            iamMember: this.iamMember,
+        };
+    }
+
+    private constructServiceAccountResourceName(): string {
+        return this.constructChildResourceName(PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX);
+    }
+
+    private constructIamMemberResourceName(): string {
+        return this.constructChildResourceName(PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX);
+    }
+
+    private constructChildResourceName(resourceName: string): string {
+        return `${this.parentName}-${resourceName}`;
+    }
+}
