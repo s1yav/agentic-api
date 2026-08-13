@@ -16,9 +16,9 @@ export interface ProductManagerIdentityArgs {
     projectId: pulumi.Input<string>;
 
     /**
-     * The service account ID username. Defaults to "pm-agent-sa".
+     * The service account ID username.
      */
-    accountId?: pulumi.Input<string>;
+    accountId: pulumi.Input<string>;
 
     /**
      * The display name of the service account. Defaults to "Product Manager Agent Service Account".
@@ -66,7 +66,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         return new ServiceAccount(
             saResourceName,
             {
-                accountId: this.parentArgs.accountId ?? PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
+                accountId: this.parentArgs.accountId,
                 displayName: this.parentArgs.displayName ?? DEFAULT_PM_AGENT_SA_DISPLAY_NAME,
                 project: this.parentArgs.projectId,
             },
