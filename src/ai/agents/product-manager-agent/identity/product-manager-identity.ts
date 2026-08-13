@@ -62,16 +62,16 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         this.parentName = name;
         this.parentArgs = args;
 
-        this.serviceAccount = this.createAndRegisterServiceAccount();
+        this.serviceAccount = this.constructServiceAccount();
         this.serviceAccountEmail = this.serviceAccount.account.email;
-        this.iamMember = this.createAndRegisterIamMember();
-        this.serviceAccountImpersonator = this.createAndRegisterServiceAccountImpersonator();
+        this.iamMember = this.constructIamMember();
+        this.serviceAccountImpersonator = this.constructServiceAccountImpersonator();
 
         const parentOutputs = this.constructParentOutputs();
         this.registerOutputs(parentOutputs);
     }
 
-    private createAndRegisterServiceAccount(): ServiceAccount {
+    private constructServiceAccount(): ServiceAccount {
         const saResourceName = this.constructServiceAccountResourceName();
         return new ServiceAccount(
             saResourceName,
@@ -84,7 +84,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         );
     }
 
-    private createAndRegisterIamMember(): gcp.projects.IAMMember {
+    private constructIamMember(): gcp.projects.IAMMember {
         const iamResourceName = this.constructIamMemberResourceName();
         return new gcp.projects.IAMMember(
             iamResourceName,
@@ -97,7 +97,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         );
     }
 
-    private createAndRegisterServiceAccountImpersonator(): gcp.serviceaccount.IAMMember {
+    private constructServiceAccountImpersonator(): gcp.serviceaccount.IAMMember {
         const impersonatorResourceName = this.constructServiceAccountImpersonatorResourceName();
         return new gcp.serviceaccount.IAMMember(
             impersonatorResourceName,
