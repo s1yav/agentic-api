@@ -11,4 +11,3 @@ export const PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX = "pm-agent-owner-role";
 
 // IAM Constants
 export const OWNER_ROLE = "roles/owner";
-export const DEFAULT_PM_AGENT_SA_DISPLAY_NAME = "Product Manager Agent Service Account";

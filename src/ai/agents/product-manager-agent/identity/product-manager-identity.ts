@@ -5,7 +5,6 @@ import {
     PRODUCT_MANAGER_IDENTITY_TYPE,
     PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
     PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX,
-    DEFAULT_PM_AGENT_SA_DISPLAY_NAME,
     OWNER_ROLE,
 } from "../../../../constants";
 
@@ -21,9 +20,9 @@ export interface ProductManagerIdentityArgs {
     accountId: pulumi.Input<string>;
 
     /**
-     * The display name of the service account. Defaults to "Product Manager Agent Service Account".
+     * The display name of the service account.
      */
-    displayName?: pulumi.Input<string>;
+    displayName: pulumi.Input<string>;
 
     /**
      * The GCP IAM role to bind to the project. Defaults to "roles/owner".
@@ -67,7 +66,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
             saResourceName,
             {
                 accountId: this.parentArgs.accountId,
-                displayName: this.parentArgs.displayName ?? DEFAULT_PM_AGENT_SA_DISPLAY_NAME,
+                displayName: this.parentArgs.displayName,
                 project: this.parentArgs.projectId,
             },
             { parent: this }
