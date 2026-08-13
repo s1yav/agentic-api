@@ -28,13 +28,15 @@
   "homepage": "https://github.com/s1yav/agentic-api#readme",
   "devDependencies": {
     "@types/node": "^26.1.2",
-    "typescript": "^7.0.2"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@genkit-ai/ai": "^1.40.1",
     "@genkit-ai/express": "^1.41.0",
     "@genkit-ai/google-cloud": "^1.40.1",
     "@genkit-ai/google-genai": "^1.40.1",
+    "@pulumi/gcp": "^9.0.0",
+    "@pulumi/pulumi": "^3.113.0",
     "firebase-admin": "^14.2.0",
     "genkit": "^1.40.1"
   }
