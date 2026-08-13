@@ -50,10 +50,20 @@ async function generateIntroduction(
 }
 
 function constructIntroductionPrompt(userName?: string, projectName?: string): string {
-  const userGreeting = userName ? `Hello ${userName}!` : 'Hello!';
+  const userContext = userName ? `The user's name is ${userName}.` : 'The user name is not provided.';
   const projectContext = projectName
-    ? ` I am ready to assist with the product management strategy for ${projectName}.`
-    : ' I am ready to assist with your product management strategy and feature planning.';
+    ? `The product or project is ${projectName}.`
+    : 'No specific project name was provided.';
 
-  return `${userGreeting} Provide a concise, professional, and welcoming introduction as an AI Product Manager Agent.${projectContext}`;
+  return `You are an AI Product Manager Agent.
+Provide a concise, professional, and welcoming introduction greeting to the user.
+
+Context:
+- ${userContext}
+- ${projectContext}
+
+Instructions:
+- Greet the user warmly (addressing them by name if provided).
+- Introduce yourself as their Product Manager Agent.
+- Briefly mention your readiness to help them with product strategy, feature breakdowns, and requirements definition.`;
 }
