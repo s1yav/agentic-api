@@ -91,7 +91,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
             {
                 project: this.parentArgs.projectId,
                 role: this.parentArgs.role ?? OWNER_ROLE,
-                member: this.constructServiceAccountMemberIdentity(this.serviceAccountEmail),
+                member: this.constructServiceAccountOwnerRoleMemberIdentity(),
             },
             { parent: this }
         );
@@ -104,7 +104,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
             {
                 serviceAccountId: this.serviceAccount.account.name,
                 role: TOKEN_CREATOR_ROLE,
-                member: this.constructServiceAccountMemberIdentity(this.parentArgs.gitopsCloudbuildSa),
+                member: this.constructServiceAccountImpersonatorIdentity(),
             },
             { parent: this }
         );
@@ -129,6 +129,14 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
 
     private constructServiceAccountImpersonatorResourceName(): string {
         return this.constructChildResourceName(PRODUCT_MANAGER_IMPERSONATOR_RESOURCE_SUFFIX);
+    }
+
+    private constructServiceAccountOwnerRoleMemberIdentity(): pulumi.Input<string> {
+        return this.constructServiceAccountMemberIdentity(this.serviceAccountEmail);
+    }
+
+    private constructServiceAccountImpersonatorIdentity(): pulumi.Input<string> {
+        return this.constructServiceAccountMemberIdentity(this.parentArgs.gitopsCloudbuildSa);
     }
 
     private constructChildResourceName(resourceName: string): string {
