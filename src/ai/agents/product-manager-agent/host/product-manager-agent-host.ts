@@ -1,11 +1,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import { Service as CloudRunv2Service, ServiceArgs as CloudRunv2ServiceArgs } from "../../../../constructs/cloudrunv2/service";
 import {
-    PRODUCT_MANAGER_AGENT_HOST_COMPONENT_TYPE,
+    PRODUCT_MANAGER_AGENT_HOST_TYPE,
     PRODUCT_MANAGER_AGENT_HOST_RESOURCE_SUFFIX,
 } from "../../../../constants";
 
-export interface ProductManagerAgentHostComponentArgs {
+export interface ProductManagerAgentHostArgs {
     /**
      * The Google Cloud project ID.
      */
@@ -37,35 +37,35 @@ export interface ProductManagerAgentHostComponentArgs {
     envVars?: Record<string, pulumi.Input<string>>;
 }
 
-interface ProductManagerAgentHostComponentOutputs {
+interface ProductManagerAgentHostOutputs {
     cloudRunService: CloudRunv2Service;
     serviceUri: pulumi.Output<string>;
 }
 
 /**
- * ProductManagerAgentHostComponent
+ * ProductManagerAgentHost
  * Self-contained Pulumi ComponentResource for hosting the Product Manager Agent flow server on Google Cloud Run v2.
  */
-export class ProductManagerAgentHostComponent extends pulumi.ComponentResource {
+export class ProductManagerAgentHost extends pulumi.ComponentResource {
     public readonly cloudRunService: CloudRunv2Service;
     public readonly serviceUri: pulumi.Output<string>;
-    private readonly parentComponentName: string;
-    private readonly parentComponentArgs: ProductManagerAgentHostComponentArgs;
-    private readonly parentComponentOutputs: ProductManagerAgentHostComponentOutputs;
+    private readonly parentName: string;
+    private readonly parentArgs: ProductManagerAgentHostArgs;
+    private readonly parentOutputs: ProductManagerAgentHostOutputs;
 
-    constructor(name: string, args: ProductManagerAgentHostComponentArgs, opts?: pulumi.ComponentResourceOptions) {
-        super(PRODUCT_MANAGER_AGENT_HOST_COMPONENT_TYPE, name, args, opts);
-        this.parentComponentName = name;
-        this.parentComponentArgs = args;
+    constructor(name: string, args: ProductManagerAgentHostArgs, opts?: pulumi.ComponentResourceOptions) {
+        super(PRODUCT_MANAGER_AGENT_HOST_TYPE, name, args, opts);
+        this.parentName = name;
+        this.parentArgs = args;
 
         this.cloudRunService = this.createAndRegisterCloudRunService();
         this.serviceUri = this.cloudRunService.uri;
 
-        this.parentComponentOutputs = this.constructParentComponentOutputs();
-        this.registerOutputs(this.parentComponentOutputs);
+        this.parentOutputs = this.constructParentOutputs();
+        this.registerOutputs(this.parentOutputs);
     }
 
-    private constructParentComponentOutputs(): ProductManagerAgentHostComponentOutputs {
+    private constructParentOutputs(): ProductManagerAgentHostOutputs {
         return {
             cloudRunService: this.cloudRunService,
             serviceUri: this.serviceUri,
@@ -83,22 +83,22 @@ export class ProductManagerAgentHostComponent extends pulumi.ComponentResource {
     }
 
     private constructChildResourceName(resourceName: string): string {
-        return `${this.parentComponentName}-${resourceName}`;
+        return `${this.parentName}-${resourceName}`;
     }
 
     private constructCloudRunServiceArgs(): CloudRunv2ServiceArgs {
         return {
             serviceName: this.constructCloudRunServiceResourceName(),
-            location: this.parentComponentArgs.location,
-            image: this.parentComponentArgs.image,
-            serviceAccount: this.parentComponentArgs.serviceAccountEmail,
-            maxInstanceCount: this.parentComponentArgs.maxInstanceCount,
+            location: this.parentArgs.location,
+            image: this.parentArgs.image,
+            serviceAccount: this.parentArgs.serviceAccountEmail,
+            maxInstanceCount: this.parentArgs.maxInstanceCount,
             envs: this.constructEnvironmentVariables(),
         };
     }
 
     private constructEnvironmentVariables() {
-        const envVars = this.parentComponentArgs.envVars ?? {};
+        const envVars = this.parentArgs.envVars ?? {};
         return Object.entries(envVars).map(([name, value]) => ({
             name,
             value,
