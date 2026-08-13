@@ -32,7 +32,7 @@ export interface AgentBuilderIdentityArgs {
     gitopsCloudbuildSa: pulumi.Input<string>;
 
     /**
-     * The GCP IAM role to bind to the project. Defaults to "roles/owner".
+     * The GCP IAM role to bind to the project.
      */
     role?: pulumi.Input<string>;
 }
