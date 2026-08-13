@@ -1,11 +1,8 @@
-// Repository Domain Namespace
-export const AGENTIC_API_DOMAIN = "agentic-api";
-
 // Component Resource Types
-export const PRODUCT_MANAGER_AGENT_HOST_TYPE = `${AGENTIC_API_DOMAIN}:ai:ProductManagerAgentHost`;
-export const PRODUCT_MANAGER_IDENTITY_TYPE = `${AGENTIC_API_DOMAIN}:ai:ProductManagerIdentity`;
-export const ACCOUNT_COMPONENT_TYPE = `${AGENTIC_API_DOMAIN}:constructs:Account`;
-export const CLOUDRUNV2_SERVICE_COMPONENT_TYPE = `${AGENTIC_API_DOMAIN}:constructs:CloudRunv2Service`;
+export const PRODUCT_MANAGER_AGENT_HOST_TYPE = "custom:components:ProductManagerAgentHost";
+export const PRODUCT_MANAGER_IDENTITY_TYPE = "custom:components:ProductManagerIdentity";
+export const ACCOUNT_COMPONENT_TYPE = "custom:components:Account";
+export const CLOUDRUNV2_SERVICE_COMPONENT_TYPE = "custom:components:CloudRunv2Service";
 
 // Component Resource Suffixes
 export const PRODUCT_MANAGER_AGENT_HOST_RESOURCE_SUFFIX = "pm-agent-host";
