@@ -8,6 +8,8 @@ export const CLOUDRUNV2_SERVICE_COMPONENT_TYPE = "custom:components:CloudRunv2Se
 export const PRODUCT_MANAGER_AGENT_HOST_RESOURCE_SUFFIX = "pm-agent-host";
 export const PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX = "pm-agent-sa";
 export const PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX = "pm-agent-owner-role";
+export const PRODUCT_MANAGER_IMPERSONATOR_RESOURCE_SUFFIX = "pm-agent-impersonator";
 
 // IAM Constants
 export const OWNER_ROLE = "roles/owner";
+export const TOKEN_CREATOR_ROLE = "roles/iam.serviceAccountTokenCreator";

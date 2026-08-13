@@ -5,6 +5,8 @@ import {
     PRODUCT_MANAGER_IDENTITY_TYPE,
     PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
     PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX,
+    PRODUCT_MANAGER_IMPERSONATOR_RESOURCE_SUFFIX,
+    TOKEN_CREATOR_ROLE,
     OWNER_ROLE,
 } from "../../../../constants";
 
@@ -25,6 +27,11 @@ export interface ProductManagerIdentityArgs {
     displayName: pulumi.Input<string>;
 
     /**
+     * The email of the cross-project GitOps Cloud Build service account.
+     */
+    gitopsCloudbuildSa: pulumi.Input<string>;
+
+    /**
      * The GCP IAM role to bind to the project. Defaults to "roles/owner".
      */
     role?: pulumi.Input<string>;
@@ -34,16 +41,19 @@ interface ProductManagerIdentityOutputs {
     serviceAccount: ServiceAccount;
     serviceAccountEmail: pulumi.Output<string>;
     iamMember: gcp.projects.IAMMember;
+    serviceAccountImpersonator: gcp.serviceaccount.IAMMember;
 }
 
 /**
  * ProductManagerIdentity
- * ComponentResource for creating the Product Manager Agent service account with permissions to run the container image.
+ * ComponentResource for creating the Product Manager Agent service account with permissions to run the container image
+ * and allowing the GitOps Cloud Build service account to impersonate it.
  */
 export class ProductManagerIdentity extends pulumi.ComponentResource {
     public readonly serviceAccount: ServiceAccount;
     public readonly serviceAccountEmail: pulumi.Output<string>;
     public readonly iamMember: gcp.projects.IAMMember;
+    public readonly serviceAccountImpersonator: gcp.serviceaccount.IAMMember;
     private readonly parentName: string;
     private readonly parentArgs: ProductManagerIdentityArgs;
 
@@ -55,6 +65,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         this.serviceAccount = this.createAndRegisterServiceAccount();
         this.serviceAccountEmail = this.serviceAccount.account.email;
         this.iamMember = this.createAndRegisterIamMember();
+        this.serviceAccountImpersonator = this.createAndRegisterServiceAccountImpersonator();
 
         const parentOutputs = this.constructParentOutputs();
         this.registerOutputs(parentOutputs);
@@ -80,7 +91,20 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
             {
                 project: this.parentArgs.projectId,
                 role: this.parentArgs.role ?? OWNER_ROLE,
-                member: pulumi.interpolate`serviceAccount:${this.serviceAccountEmail}`,
+                member: this.constructServiceAccountMemberIdentity(this.serviceAccountEmail),
+            },
+            { parent: this }
+        );
+    }
+
+    private createAndRegisterServiceAccountImpersonator(): gcp.serviceaccount.IAMMember {
+        const impersonatorResourceName = this.constructServiceAccountImpersonatorResourceName();
+        return new gcp.serviceaccount.IAMMember(
+            impersonatorResourceName,
+            {
+                serviceAccountId: this.serviceAccount.account.name,
+                role: TOKEN_CREATOR_ROLE,
+                member: this.constructServiceAccountMemberIdentity(this.parentArgs.gitopsCloudbuildSa),
             },
             { parent: this }
         );
@@ -91,6 +115,7 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
             serviceAccount: this.serviceAccount,
             serviceAccountEmail: this.serviceAccountEmail,
             iamMember: this.iamMember,
+            serviceAccountImpersonator: this.serviceAccountImpersonator,
         };
     }
 
@@ -102,7 +127,15 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         return this.constructChildResourceName(PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX);
     }
 
+    private constructServiceAccountImpersonatorResourceName(): string {
+        return this.constructChildResourceName(PRODUCT_MANAGER_IMPERSONATOR_RESOURCE_SUFFIX);
+    }
+
     private constructChildResourceName(resourceName: string): string {
         return `${this.parentName}-${resourceName}`;
+    }
+
+    private constructServiceAccountMemberIdentity(serviceAccountEmail: pulumi.Input<string>): pulumi.Input<string> {
+        return pulumi.interpolate`serviceAccount:${serviceAccountEmail}`;
     }
 }
