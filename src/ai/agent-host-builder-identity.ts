@@ -1,14 +1,16 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
-import { Account as ServiceAccount } from "../../../../constructs/serviceaccount/account";
+import { Account as ServiceAccount } from "../constructs/serviceaccount/account";
 import {
-    PRODUCT_MANAGER_IDENTITY_TYPE,
-    PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX,
-    PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX,
+    AGENT_HOST_BUILDER_IDENTITY_TYPE,
+    AGENT_HOST_BUILDER_SA_RESOURCE_SUFFIX,
+    AGENT_HOST_BUILDER_OWNER_ROLE_RESOURCE_SUFFIX,
+    AGENT_HOST_BUILDER_IMPERSONATOR_RESOURCE_SUFFIX,
+    TOKEN_CREATOR_ROLE,
     OWNER_ROLE,
-} from "../../../../constants";
+} from "../constants";
 
-export interface ProductManagerIdentityArgs {
+export interface AgentHostBuilderIdentityArgs {
     /**
      * The Google Cloud project ID.
      */
@@ -25,36 +27,45 @@ export interface ProductManagerIdentityArgs {
     displayName: pulumi.Input<string>;
 
     /**
+     * The email of the cross-project GitOps Cloud Build service account.
+     */
+    gitopsCloudbuildSa: pulumi.Input<string>;
+
+    /**
      * The GCP IAM role to bind to the project. Defaults to "roles/owner".
      */
     role?: pulumi.Input<string>;
 }
 
-interface ProductManagerIdentityOutputs {
+interface AgentHostBuilderIdentityOutputs {
     serviceAccount: ServiceAccount;
     serviceAccountEmail: pulumi.Output<string>;
     iamMember: gcp.projects.IAMMember;
+    serviceAccountImpersonator: gcp.serviceaccount.IAMMember;
 }
 
 /**
- * ProductManagerIdentity
- * ComponentResource for creating the Product Manager Agent service account with permissions to run the container image.
+ * AgentHostBuilderIdentity
+ * ComponentResource for creating the Agent Host Builder service account with project owner permissions
+ * and allowing the GitOps Cloud Build service account to impersonate it.
  */
-export class ProductManagerIdentity extends pulumi.ComponentResource {
+export class AgentHostBuilderIdentity extends pulumi.ComponentResource {
     public readonly serviceAccount: ServiceAccount;
     public readonly serviceAccountEmail: pulumi.Output<string>;
     public readonly iamMember: gcp.projects.IAMMember;
+    public readonly serviceAccountImpersonator: gcp.serviceaccount.IAMMember;
     private readonly parentName: string;
-    private readonly parentArgs: ProductManagerIdentityArgs;
+    private readonly parentArgs: AgentHostBuilderIdentityArgs;
 
-    constructor(name: string, args: ProductManagerIdentityArgs, opts?: pulumi.ComponentResourceOptions) {
-        super(PRODUCT_MANAGER_IDENTITY_TYPE, name, args, opts);
+    constructor(name: string, args: AgentHostBuilderIdentityArgs, opts?: pulumi.ComponentResourceOptions) {
+        super(AGENT_HOST_BUILDER_IDENTITY_TYPE, name, args, opts);
         this.parentName = name;
         this.parentArgs = args;
 
         this.serviceAccount = this.constructServiceAccount();
         this.serviceAccountEmail = this.serviceAccount.account.email;
         this.iamMember = this.constructIamMember();
+        this.serviceAccountImpersonator = this.constructServiceAccountImpersonator();
 
         const parentOutputs = this.constructParentOutputs();
         this.registerOutputs(parentOutputs);
@@ -86,24 +97,46 @@ export class ProductManagerIdentity extends pulumi.ComponentResource {
         );
     }
 
-    private constructParentOutputs(): ProductManagerIdentityOutputs {
+    private constructServiceAccountImpersonator(): gcp.serviceaccount.IAMMember {
+        const impersonatorResourceName = this.constructServiceAccountImpersonatorResourceName();
+        return new gcp.serviceaccount.IAMMember(
+            impersonatorResourceName,
+            {
+                serviceAccountId: this.serviceAccount.account.name,
+                role: TOKEN_CREATOR_ROLE,
+                member: this.constructServiceAccountImpersonatorIdentity(),
+            },
+            { parent: this }
+        );
+    }
+
+    private constructParentOutputs(): AgentHostBuilderIdentityOutputs {
         return {
             serviceAccount: this.serviceAccount,
             serviceAccountEmail: this.serviceAccountEmail,
             iamMember: this.iamMember,
+            serviceAccountImpersonator: this.serviceAccountImpersonator,
         };
     }
 
     private constructServiceAccountResourceName(): string {
-        return this.constructChildResourceName(PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX);
+        return this.constructChildResourceName(AGENT_HOST_BUILDER_SA_RESOURCE_SUFFIX);
     }
 
     private constructIamMemberResourceName(): string {
-        return this.constructChildResourceName(PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX);
+        return this.constructChildResourceName(AGENT_HOST_BUILDER_OWNER_ROLE_RESOURCE_SUFFIX);
+    }
+
+    private constructServiceAccountImpersonatorResourceName(): string {
+        return this.constructChildResourceName(AGENT_HOST_BUILDER_IMPERSONATOR_RESOURCE_SUFFIX);
     }
 
     private constructServiceAccountOwnerRoleMemberIdentity(): pulumi.Input<string> {
         return this.constructServiceAccountMemberIdentity(this.serviceAccountEmail);
+    }
+
+    private constructServiceAccountImpersonatorIdentity(): pulumi.Input<string> {
+        return this.constructServiceAccountMemberIdentity(this.parentArgs.gitopsCloudbuildSa);
     }
 
     private constructChildResourceName(resourceName: string): string {

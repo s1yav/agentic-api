@@ -1,6 +1,7 @@
 // Component Resource Types
 export const PRODUCT_MANAGER_AGENT_HOST_TYPE = "custom:components:ProductManagerAgentHost";
 export const PRODUCT_MANAGER_IDENTITY_TYPE = "custom:components:ProductManagerIdentity";
+export const AGENT_HOST_BUILDER_IDENTITY_TYPE = "custom:components:AgentHostBuilderIdentity";
 export const ACCOUNT_COMPONENT_TYPE = "custom:components:Account";
 export const CLOUDRUNV2_SERVICE_COMPONENT_TYPE = "custom:components:CloudRunv2Service";
 
@@ -8,7 +9,9 @@ export const CLOUDRUNV2_SERVICE_COMPONENT_TYPE = "custom:components:CloudRunv2Se
 export const PRODUCT_MANAGER_AGENT_HOST_RESOURCE_SUFFIX = "pm-agent-host";
 export const PRODUCT_MANAGER_IDENTITY_RESOURCE_SUFFIX = "pm-agent-sa";
 export const PRODUCT_MANAGER_OWNER_ROLE_RESOURCE_SUFFIX = "pm-agent-owner-role";
-export const PRODUCT_MANAGER_IMPERSONATOR_RESOURCE_SUFFIX = "pm-agent-impersonator";
+export const AGENT_HOST_BUILDER_SA_RESOURCE_SUFFIX = "agent-host-builder-sa";
+export const AGENT_HOST_BUILDER_OWNER_ROLE_RESOURCE_SUFFIX = "agent-host-builder-owner-role";
+export const AGENT_HOST_BUILDER_IMPERSONATOR_RESOURCE_SUFFIX = "agent-host-builder-impersonator";
 
 // IAM Constants
 export const OWNER_ROLE = "roles/owner";
