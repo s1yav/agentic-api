@@ -39,6 +39,7 @@
     "@genkit-ai/google-cloud": "^1.40.1",
     "@genkit-ai/google-genai": "^1.40.1",
     "firebase-admin": "^14.2.0",
+    "gcp-constructs": "file:../gcp-constructs",
     "genkit": "^1.41.0"
   }
 }
