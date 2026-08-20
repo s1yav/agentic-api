@@ -1,5 +1,6 @@
 import { Part } from 'genkit/beta';
 import { DecodedIdToken } from 'firebase-admin/auth';
+import { SessionStore } from './session-store';
 
 /**
  * Input payload interface for chat interaction methods.
@@ -13,57 +14,6 @@ export interface ChatInput {
 
     /** Optional MIME type of the attached media asset (e.g. 'image/png'). */
     contentType?: string;
-}
-
-/**
- * Contract interface or API contract for session storage backends (e.g. Firestore, Redis, Memory).
- * 
- * Provides an abstraction layer for reading, writing, checking existence, and clearing
- * persistent agent session state bound to user session IDs.
- *
- * @template S The shape of the state stored within the session store.
- */
-/**
- * Contract interface or API contract for session storage backends (e.g. Firestore, Redis, Memory).
- * 
- * Provides an abstraction layer for reading, writing, checking existence, and clearing
- * persistent agent session state bound to user session IDs.
- *
- * @template S The shape of the state stored within the session store.
- */
-export interface SessionStore<S> {
-    /**
-     * Checks whether a session state entry exists in the storage backend for the given session ID.
-     *
-     * @param sessionId The unique session identifier (typically the user's UID).
-     * @returns A promise resolving to true if the session exists, false otherwise.
-     */
-    has(sessionId: string): Promise<boolean>;
-
-    /**
-     * Clears and deletes the stored session state from the persistent storage backend.
-     *
-     * @param sessionId The unique session identifier to clear.
-     * @returns A promise that resolves with true when the session has been cleared.
-     */
-    clear(sessionId: string): Promise<boolean>;
-
-    /**
-     * Retrieves the stored session state from the persistent storage backend.
-     *
-     * @param sessionId The unique session identifier.
-     * @returns A promise resolving to the session state if found, or undefined if not initialized.
-     */
-    get(sessionId: string): Promise<S | undefined>;
-
-    /**
-     * Writes or updates the session state in the persistent storage backend.
-     *
-     * @param sessionId The unique session identifier.
-     * @param state The updated session state object to persist.
-     * @returns A promise that resolves when the state is successfully saved with a sessionId.
-     */
-    set(sessionId: string, state: S): Promise<void>;
 }
 
 /**

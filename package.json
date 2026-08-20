@@ -7,9 +7,10 @@
   "scripts": {
     "build": "tsc",
     "genkit-ui": "npx genkit start -- npx tsx src/ai/index.ts",
+    "genkit-cli": "npx genkit flow:run",
     "start": "node dist/ai/index.js",
     "start:pm-server": "npm run build && node dist/ai/agents/product-manager-agent/flow-server.js",
-    "test": "npx tsc --project tsconfig.test.json && node --test dist/tests/errors/index.test.js dist/tests/reusable-components/flow-server-component.test.js dist/tests/agents/product-manager-agent/introduce-product-manager.test.js dist/tests/agents/product-manager-agent/generate-technical-prd.test.js dist/tests/agents/product-manager-agent/break-down-user-story.test.js dist/tests/agents/product-manager-agent/assess-technical-tradeoffs.test.js"
+    "test": "npx tsc --project tsconfig.test.json && node --test dist/tests/errors/index.test.js dist/tests/reusable-components/flow-server-component.test.js dist/tests/session-store/session-store.test.js dist/tests/agents/product-manager-agent/introduce-product-manager.test.js dist/tests/agents/product-manager-agent/generate-technical-prd.test.js dist/tests/agents/product-manager-agent/break-down-user-story.test.js dist/tests/agents/product-manager-agent/assess-technical-tradeoffs.test.js"
   },
   "repository": {
     "type": "git",
