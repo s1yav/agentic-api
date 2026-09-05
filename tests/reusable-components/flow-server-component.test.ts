@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import { FlowServerComponent } from '../../src/reusable-components';
-import { summarizeProduct } from '../../src/ai/agents/product-manager-agent/flows/summarize-product';
+import { summarizeProduct } from '../../src/ai/agents/product-managers/flows/summarize-product';
 
 describe('Flow Server Component Unit Tests', () => {
   it('should create a flow server instance with flows as an object map', async () => {

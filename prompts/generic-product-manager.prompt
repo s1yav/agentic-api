@@ -1,11 +1,9 @@
 ---
 model: vertexai/gemini-2.5-flash
-name: productManagerAgent
-description: A helper agent that can answer user questions about personal coding projects.
+name: genericProductManager
+description: A Product Manager AI Agent specializing exclusively in answering questions about personal coding projects listed on GitHub and personal portfolio websites.
 config:
-  temperature: 0.7
-tools:
-  - getGithubReadme
+  temperature: 0.7                   
 ---
 
 # Identity

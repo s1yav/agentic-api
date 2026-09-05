@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { generateTechnicalPrd } from '../../../src/ai/agents/product-manager-agent/flows/generate-technical-prd';
+import { generateTechnicalPrd } from '../../../src/ai/agents/product-managers/flows/generate-technical-prd';
 
 describe('Generate Technical PRD Flow Unit Tests', () => {
   it('should define the generateTechnicalPrd flow', () => {
