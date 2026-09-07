@@ -1,1 +1,1 @@
-export * from './flow-server-component';
+export * from './flow-server';
