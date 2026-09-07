@@ -25,10 +25,10 @@ interface CorsArgs {
 }
 
 /**
- * Reusable Class Component that encapsulates configuration, App Check authentication,
+ * Reusable Class that encapsulates configuration, App Check authentication,
  * CORS headers, and lifecycle management for Express Flow Servers.
  */
-export class FlowServerComponent {
+export class FlowServer {
   private readonly args: FlowServerArgs;
   private serverInstance: ReturnType<typeof startFlowServer> | null = null;
 

@@ -1,4 +1,4 @@
-import { FlowServerComponent } from '../../../../reusable-components';
+import { FlowServer } from '../../../../reusable-components';
 import { PORT } from './agent';
 import { summarizeProduct } from '../flows/summarize-product';
 import { explainProductFeature } from '../flows/explain-product-feature';
@@ -18,7 +18,7 @@ export const flows = {
   assessTechnicalTradeoffs,
 } as const;
 
-export const flowServer = new FlowServerComponent({
+export const flowServer = new FlowServer({
   agentName: 'Generic Product Manager Agent',
   port: Number(PORT),
   flows,
