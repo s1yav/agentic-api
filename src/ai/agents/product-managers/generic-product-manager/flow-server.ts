@@ -19,8 +19,8 @@ export const flows = {
 } as const;
 
 export const flowServer = new FlowServer({
-  agentName: 'Generic Product Manager Agent',
-  port: Number(PORT),
+  agentName: 'generic-product-manager',
+  port: PORT,
   flows,
 });
 
