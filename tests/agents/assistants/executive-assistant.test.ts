@@ -12,7 +12,6 @@ import {
   EXECUTIVE_ASSISTANT_PORT,
   PERSONAL_ASSISTANT_PORT,
   RESEARCH_ASSISTANT_PORT,
-  DEFAULT_ASSISTANT_PORT,
   ASSISTANT_PORTS,
 } from '../../../src/ai/agents/assistants/ports';
 import { agent as executiveAssistantAgent } from '../../../src/ai/agents/assistants/executive-assistant/agent';
@@ -41,11 +40,9 @@ describe('Executive Assistant Flows Unit Tests', () => {
   });
 
   it('should define valid port configurations for assistants', () => {
-    assert.strictEqual(ASSISTANT_PORTS.DEFAULT, DEFAULT_ASSISTANT_PORT);
     assert.strictEqual(ASSISTANT_PORTS.EXECUTIVE, EXECUTIVE_ASSISTANT_PORT);
     assert.strictEqual(ASSISTANT_PORTS.PERSONAL, PERSONAL_ASSISTANT_PORT);
     assert.strictEqual(ASSISTANT_PORTS.RESEARCH, RESEARCH_ASSISTANT_PORT);
-    assert.strictEqual(DEFAULT_ASSISTANT_PORT, 3010);
     assert.strictEqual(EXECUTIVE_ASSISTANT_PORT, 3010);
     assert.strictEqual(PERSONAL_ASSISTANT_PORT, 3011);
     assert.strictEqual(RESEARCH_ASSISTANT_PORT, 3012);
@@ -70,10 +67,11 @@ describe('Executive Assistant Flows Unit Tests', () => {
   it('should support dynamic assistant port overrides via environment variables', () => {
     const testPort = '4600';
     process.env.EXECUTIVE_ASSISTANT_PORT = testPort;
-    const resolved = Number(process.env.EXECUTIVE_ASSISTANT_PORT) || DEFAULT_ASSISTANT_PORT;
+    const resolved = Number(process.env.EXECUTIVE_ASSISTANT_PORT) || EXECUTIVE_ASSISTANT_PORT;
     assert.strictEqual(resolved, 4600);
     delete process.env.EXECUTIVE_ASSISTANT_PORT;
   });
 });
+
 
 
