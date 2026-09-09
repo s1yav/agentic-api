@@ -98,10 +98,31 @@ npx genkit flow:run explain-product-feature '{
 }' --wait
 ```
 
-#### G. Gather Product Context Flow
+#### H. Introduce Executive Assistant Flow
 ```bash
-npx genkit flow:run gather-product-context '{
-  "query": "Product Manager Agent capabilities and flow specifications"
+npx genkit flow:run introduce-executive-assistant '{"name":"Alex Vance","preferredTitle":"Chief of Staff"}' --wait
+```
+
+#### I. Draft Executive Brief Flow
+```bash
+npx genkit flow:run draft-executive-brief '{
+  "topic": "Genkit Micro-Agent Architecture Migration",
+  "sourceMaterial": "Migrating from monolithic agent to specialized role agents with independent express flow servers. Benefits include isolated failure domains and clean code separation.",
+  "targetAudience": "Executive Leadership Team",
+  "urgencyLevel": "high"
+}' --wait
+```
+
+#### J. Schedule & Prioritize Flow
+```bash
+npx genkit flow:run schedule-and-prioritize '{
+  "tasks": [
+    "Board presentation review (2 hours)",
+    "Urgent vendor NDA signoff (15 mins)",
+    "Candidate resume screening (45 mins)"
+  ],
+  "existingCommitments": "10:00 AM - 11:00 AM Team Sync; 02:00 PM - 02:30 PM Architecture Review",
+  "availableTime": "8:30 AM - 5:00 PM EDT"
 }' --wait
 ```
 
@@ -122,6 +143,20 @@ npm test
 
 ---
 
+## Specialized Agent Directory & Port Matrix
+
+| Agent Type | Directory | Port | Key Flows / Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Generic Product Manager** | `src/ai/agents/product-managers/generic-product-manager/` | `3002` | PRD generation, story breakdown, feature explanation, context gathering |
+| **Technical Product Manager** | `src/ai/agents/product-managers/technical-product-manager/` | `3003` | Technical PRD generation, story breakdown, architecture tradeoff analysis |
+| **Growth Product Manager** | `src/ai/agents/product-managers/growth-product-manager/` | `3004` | Product summaries, context discovery, user-facing feature explanations |
+| **AI Product Manager** | `src/ai/agents/product-managers/ai-product-manager/` | `3005` | Technical PRD generation, architecture tradeoff analysis, feature explanation |
+| **Executive Assistant** | `src/ai/agents/assistants/executive-assistant/` | `3010` | Executive briefings, meeting prep, stakeholder communications, time prioritization |
+| **Personal Assistant** | `src/ai/agents/assistants/personal-assistant/` | `3011` | Daily schedule management, task prioritization, conflict resolution, correspondence |
+| **Research Assistant** | `src/ai/agents/assistants/research-assistant/` | `3012` | Research briefings, literature synthesis, meeting note distillation |
+
+---
+
 ## Architectural Design Decisions
 
 ### Dedicated Agent Flow Servers (Micro-Server Architecture)
@@ -136,7 +171,7 @@ Each agent module in `agentic-api` encapsulates its own dedicated HTTP flow serv
 | **Independent Scaling** | **High**: High-traffic agent servers can scale independently based on domain demand. | **Medium**: All agents scale monolithically regardless of traffic distribution. |
 | **Domain Bounding** | **High**: Flows, port allocation, App Check verification, and CORS policies are self-contained within each agent directory. | **Medium**: Shared configuration across all endpoints. |
 | **Resource Overhead** | **Moderate**: Each server process incurs isolated runtime memory overhead. | **Low**: Single process serves all flows. |
-| **Ingress & Routing** | Dedicated port allocation (e.g., Port `3002` for `generic-product-manager`) or reverse proxy / API Gateway routing. | Single port exposed. |
+| **Ingress & Routing** | Dedicated port allocation (e.g., Port `3002` for `generic-product-manager`, `3010` for `executive-assistant`) or reverse proxy / API Gateway routing. | Single port exposed. |
 
 #### Architectural Verdict & Recommendation
 
@@ -152,7 +187,13 @@ import {
   SessionStore,
   ChatInput
 } from 'agentic-api';
-import { ProductManagerAgent, ProductManagerFlowServer } from 'agentic-api';
+import {
+  ProductManagerAgent,
+  TechnicalProductManagerAgent,
+  ExecutiveAssistantAgent,
+  PersonalAssistantAgent,
+  ResearchAssistantAgent,
+} from 'agentic-api';
 
 // Exported agent flow servers can be started independently or integrated into Express applications
 ```
@@ -160,3 +201,4 @@ import { ProductManagerAgent, ProductManagerFlowServer } from 'agentic-api';
 ## License
 
 [MIT License](LICENSE)
+
