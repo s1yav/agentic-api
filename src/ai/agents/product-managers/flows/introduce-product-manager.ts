@@ -33,7 +33,7 @@ export const introduceProductManager = ai.defineFlow(
 async function generateIntroduction(
   input: IntroduceProductManagerInput
 ): Promise<IntroduceProductManagerOutput> {
-  const prompt = constructIntroductionPrompt(input.userName, input.projectName);
+  const prompt = constructIntroductionPrompt(input);
   const response = await ai.generate(prompt);
 
   const capabilities = [
@@ -49,10 +49,10 @@ async function generateIntroduction(
   };
 }
 
-function constructIntroductionPrompt(userName?: string, projectName?: string): string {
-  const userContext = userName ? `The user's name is ${userName}.` : 'The user name is not provided.';
-  const projectContext = projectName
-    ? `The product or project is ${projectName}.`
+function constructIntroductionPrompt(input: IntroduceProductManagerInput): string {
+  const userContext = input.userName ? `The user's name is ${input.userName}.` : 'The user name is not provided.';
+  const projectContext = input.projectName
+    ? `The product or project is ${input.projectName}.`
     : 'No specific project name was provided.';
 
   return `You are an AI Product Manager Agent.
