@@ -1,12 +1,23 @@
 /**
  * Port configuration constants for Assistant agents.
- * Centralizes all default port allocations for local development, testing, and flow servers.
+ * Centralizes all default port allocations with environment variable fallback support.
  */
 
-export const DEFAULT_ASSISTANT_PORT = 3010;
-export const EXECUTIVE_ASSISTANT_PORT = 3010;
-export const PERSONAL_ASSISTANT_PORT = 3011;
-export const RESEARCH_ASSISTANT_PORT = 3012;
+function resolvePort(envValue: string | undefined, defaultPort: number): number {
+  const parsed = Number(envValue);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultPort;
+}
+
+export const DEFAULT_ASSISTANT_PORT = resolvePort(
+  process.env.DEFAULT_ASSISTANT_PORT || process.env.EXECUTIVE_ASSISTANT_PORT,
+  3010
+);
+export const EXECUTIVE_ASSISTANT_PORT = resolvePort(
+  process.env.EXECUTIVE_ASSISTANT_PORT || process.env.DEFAULT_ASSISTANT_PORT,
+  3010
+);
+export const PERSONAL_ASSISTANT_PORT = resolvePort(process.env.PERSONAL_ASSISTANT_PORT, 3011);
+export const RESEARCH_ASSISTANT_PORT = resolvePort(process.env.RESEARCH_ASSISTANT_PORT, 3012);
 
 export const ASSISTANT_PORTS = {
   DEFAULT: DEFAULT_ASSISTANT_PORT,
@@ -17,3 +28,4 @@ export const ASSISTANT_PORTS = {
 
 export type AssistantPortType = typeof ASSISTANT_PORTS[keyof typeof ASSISTANT_PORTS];
 export type AssistantPortKey = keyof typeof ASSISTANT_PORTS;
+

@@ -66,5 +66,14 @@ describe('Executive Assistant Flows Unit Tests', () => {
     assert.ok(researchAssistantAgent);
     assert.strictEqual(typeof researchAssistantAgent, 'function');
   });
+
+  it('should support dynamic assistant port overrides via environment variables', () => {
+    const testPort = '4600';
+    process.env.EXECUTIVE_ASSISTANT_PORT = testPort;
+    const resolved = Number(process.env.EXECUTIVE_ASSISTANT_PORT) || DEFAULT_ASSISTANT_PORT;
+    assert.strictEqual(resolved, 4600);
+    delete process.env.EXECUTIVE_ASSISTANT_PORT;
+  });
 });
+
 

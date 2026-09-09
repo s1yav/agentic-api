@@ -36,4 +36,13 @@ describe('Product Manager Ports Constants Unit Tests', () => {
     const sortedKeys = [...keys].sort();
     assert.deepStrictEqual(keys, sortedKeys, 'PRODUCT_MANAGER_PORTS keys should be in alphabetical order');
   });
+
+  it('should support dynamic port overrides via environment variables', () => {
+    const testPort = '4500';
+    process.env.GENERIC_PRODUCT_MANAGER_PORT = testPort;
+    const resolved = Number(process.env.GENERIC_PRODUCT_MANAGER_PORT) || DEFAULT_PRODUCT_MANAGER_PORT;
+    assert.strictEqual(resolved, 4500);
+    delete process.env.GENERIC_PRODUCT_MANAGER_PORT;
+  });
 });
+
