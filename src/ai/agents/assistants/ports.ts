@@ -8,19 +8,11 @@ function resolvePort(envValue: string | undefined, defaultPort: number): number 
   return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultPort;
 }
 
-export const DEFAULT_ASSISTANT_PORT = resolvePort(
-  process.env.DEFAULT_ASSISTANT_PORT || process.env.EXECUTIVE_ASSISTANT_PORT,
-  3010
-);
-export const EXECUTIVE_ASSISTANT_PORT = resolvePort(
-  process.env.EXECUTIVE_ASSISTANT_PORT || process.env.DEFAULT_ASSISTANT_PORT,
-  3010
-);
+export const EXECUTIVE_ASSISTANT_PORT = resolvePort(process.env.EXECUTIVE_ASSISTANT_PORT, 3010);
 export const PERSONAL_ASSISTANT_PORT = resolvePort(process.env.PERSONAL_ASSISTANT_PORT, 3011);
 export const RESEARCH_ASSISTANT_PORT = resolvePort(process.env.RESEARCH_ASSISTANT_PORT, 3012);
 
 export const ASSISTANT_PORTS = {
-  DEFAULT: DEFAULT_ASSISTANT_PORT,
   EXECUTIVE: EXECUTIVE_ASSISTANT_PORT,
   PERSONAL: PERSONAL_ASSISTANT_PORT,
   RESEARCH: RESEARCH_ASSISTANT_PORT,
