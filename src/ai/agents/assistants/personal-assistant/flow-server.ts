@@ -1,8 +1,10 @@
 import { FlowServer } from '../../../../reusable-components';
 import { PORT } from './agent';
-import { introduceExecutiveAssistant } from '../flows/introduce-executive-assistant';
-import { draftCommunication } from '../flows/draft-communication';
-import { scheduleAndPrioritize } from '../flows/schedule-and-prioritize';
+import {
+  draftCommunication,
+  introduceExecutiveAssistant,
+  scheduleAndPrioritize,
+} from '../flows';
 
 export const flows = {
   introduceExecutiveAssistant,

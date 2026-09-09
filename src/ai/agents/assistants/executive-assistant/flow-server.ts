@@ -1,11 +1,13 @@
 import { FlowServer } from '../../../../reusable-components';
 import { PORT } from './agent';
-import { introduceExecutiveAssistant } from '../flows/introduce-executive-assistant';
-import { draftExecutiveBrief } from '../flows/draft-executive-brief';
-import { prepareMeetingAgenda } from '../flows/prepare-meeting-agenda';
-import { summarizeMeetingNotes } from '../flows/summarize-meeting-notes';
-import { draftCommunication } from '../flows/draft-communication';
-import { scheduleAndPrioritize } from '../flows/schedule-and-prioritize';
+import {
+  draftCommunication,
+  draftExecutiveBrief,
+  introduceExecutiveAssistant,
+  prepareMeetingAgenda,
+  scheduleAndPrioritize,
+  summarizeMeetingNotes,
+} from '../flows';
 
 export const flows = {
   introduceExecutiveAssistant,
