@@ -41,45 +41,6 @@ steps:
     env:
       - 'DOCKER_BUILDKIT=1'
 
-  # 4. Deploy / update Cloud Run service for Product Managers
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy product-managers \
-          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA" \
-          --region="$LOCATION" \
-          --platform="managed" \
-          --set-env-vars="NODE_ENV=production" \
-          --allow-unauthenticated || echo "Product managers Cloud Run deployment completed or deferred"
-
-  # 5. Deploy / update Cloud Run service for Assistants
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy assistants \
-          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA" \
-          --region="$LOCATION" \
-          --platform="managed" \
-          --set-env-vars="NODE_ENV=production" \
-          --allow-unauthenticated || echo "Assistants Cloud Run deployment completed or deferred"
-
-  # 6. Deploy / update Cloud Run service for Mouse
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy mouse \
-          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA" \
-          --region="$LOCATION" \
-          --platform="managed" \
-          --set-env-vars="NODE_ENV=production" \
-          --allow-unauthenticated || echo "Mouse Cloud Run deployment completed or deferred"
-
 # Push built images to Artifact Registry
 images:
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
