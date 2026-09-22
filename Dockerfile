@@ -60,3 +60,14 @@ EXPOSE 8080 3010 3011 3012
 
 # Default command: launch Executive Assistant flow server
 CMD ["node", "dist/ai/agents/assistants/executive-assistant/flow-server.js"]
+
+# ==============================================================================
+# Stage 5: Mouse Target Image
+# ==============================================================================
+FROM base-runner AS mouse
+
+# Expose Mouse flow server port & Cloud Run standard port
+EXPOSE 8080 3020
+
+# Default command: launch Mouse flow server
+CMD ["node", "dist/ai/agents/mouse/flow-server.js"]

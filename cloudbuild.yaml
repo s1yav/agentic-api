@@ -27,7 +27,21 @@ steps:
     env:
       - 'DOCKER_BUILDKIT=1'
 
-  # 3. Deploy / update Cloud Run service for Product Managers
+  # 3. Build mouse container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--target'
+      - 'mouse'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:latest'
+      - '.'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+
+  # 4. Deploy / update Cloud Run service for Product Managers
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -40,7 +54,7 @@ steps:
           --set-env-vars="NODE_ENV=production" \
           --allow-unauthenticated || echo "Product managers Cloud Run deployment completed or deferred"
 
-  # 4. Deploy / update Cloud Run service for Assistants
+  # 5. Deploy / update Cloud Run service for Assistants
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -53,12 +67,27 @@ steps:
           --set-env-vars="NODE_ENV=production" \
           --allow-unauthenticated || echo "Assistants Cloud Run deployment completed or deferred"
 
+  # 6. Deploy / update Cloud Run service for Mouse
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy mouse \
+          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA" \
+          --region="$LOCATION" \
+          --platform="managed" \
+          --set-env-vars="NODE_ENV=production" \
+          --allow-unauthenticated || echo "Mouse Cloud Run deployment completed or deferred"
+
 # Push built images to Artifact Registry
 images:
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:latest'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA'
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:latest'
 
 options:
   # Log directly to Google Cloud Logging

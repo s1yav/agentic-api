@@ -3,4 +3,5 @@ export * from './session-store';
 export * from './agent-session-manager';
 export * from './agents/product-managers';
 export * from './agents/assistants';
+export * from './agents/mouse';
 export * from '../errors';
