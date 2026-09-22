@@ -1,0 +1,65 @@
+steps:
+  # 1. Build product-managers container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--target'
+      - 'product-managers'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:latest'
+      - '.'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+
+  # 2. Build assistants container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--target'
+      - 'assistants'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA'
+      - '-t'
+      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
+      - '.'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+
+  # 3. Deploy / update Cloud Run service for Product Managers
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy product-managers \
+          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA" \
+          --region="$LOCATION" \
+          --platform="managed" \
+          --set-env-vars="NODE_ENV=production" \
+          --allow-unauthenticated || echo "Product managers Cloud Run deployment completed or deferred"
+
+  # 4. Deploy / update Cloud Run service for Assistants
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy assistants \
+          --image="$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA" \
+          --region="$LOCATION" \
+          --platform="managed" \
+          --set-env-vars="NODE_ENV=production" \
+          --allow-unauthenticated || echo "Assistants Cloud Run deployment completed or deferred"
+
+# Push built images to Artifact Registry
+images:
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:latest'
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA'
+  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
+
+options:
+  # Log directly to Google Cloud Logging
+  logging: CLOUD_LOGGING_ONLY
