@@ -41,6 +41,28 @@ steps:
     env:
       - 'DOCKER_BUILDKIT=1'
 
+  # 4. Promote new agent image tags to the sriyav-firebasehost repository
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        git config --global user.email "cloudbuild@google.com"
+        git config --global user.name "Google Cloud Build"
+        
+        git clone https://x-access-token:$$GITHUB_TOKEN@github.com/s1yav/sriyav-firebasehost.git
+        cd sriyav-firebasehost
+        
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > mouse-agent-image-tag.json
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > product-managers-image-tag.json
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > assistants-image-tag.json
+        
+        git add mouse-agent-image-tag.json product-managers-image-tag.json assistants-image-tag.json
+        git commit -m "Promote agentic-api image tags to $COMMIT_SHA" || echo "No changes to commit"
+        git push origin main
+    secretEnv:
+      - 'GITHUB_TOKEN'
+
 # Push built images to Artifact Registry
 images:
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
@@ -49,6 +71,12 @@ images:
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:latest'
+
+# Retrieve the GitHub Access Token from Secret Manager
+availableSecrets:
+  secretManager:
+    - versionName: 'projects/$PROJECT_ID/secrets/$_GITHUB_ACCESS_TOKEN_ID/versions/latest'
+      env: 'GITHUB_TOKEN'
 
 options:
   # Log directly to Google Cloud Logging
