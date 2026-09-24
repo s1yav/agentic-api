@@ -7,8 +7,6 @@ steps:
       - 'product-managers'
       - '-t'
       - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
-      - '-t'
-      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:latest'
       - '.'
     env:
       - 'DOCKER_BUILDKIT=1'
@@ -21,8 +19,6 @@ steps:
       - 'assistants'
       - '-t'
       - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA'
-      - '-t'
-      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
       - '.'
     env:
       - 'DOCKER_BUILDKIT=1'
@@ -35,8 +31,6 @@ steps:
       - 'mouse'
       - '-t'
       - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA'
-      - '-t'
-      - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:latest'
       - '.'
     env:
       - 'DOCKER_BUILDKIT=1'
@@ -67,11 +61,8 @@ steps:
 # Push built images to Artifact Registry
 images:
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:$COMMIT_SHA'
-  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/product-managers:latest'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:$COMMIT_SHA'
-  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/assistants:latest'
   - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:$COMMIT_SHA'
-  - '$LOCATION-docker.pkg.dev/$PROJECT_ID/$_ARTIFACTREGISTRY_NAME/mouse:latest'
 
 # Retrieve the GitHub Access Token from Secret Manager
 availableSecrets:
