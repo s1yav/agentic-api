@@ -53,11 +53,12 @@ steps:
         git clone https://x-access-token:$$GITHUB_TOKEN@github.com/s1yav/sriyav-firebasehost.git
         cd sriyav-firebasehost
         
-        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > mouse-agent-image-tag.json
-        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > product-managers-image-tag.json
-        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > assistants-image-tag.json
+        mkdir -p agent-hosts/image-tags
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > agent-hosts/image-tags/mouse-agent-image-tag.json
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > agent-hosts/image-tags/product-managers-image-tag.json
+        echo "{\"commitSha\": \"$COMMIT_SHA\"}" > agent-hosts/image-tags/assistants-image-tag.json
         
-        git add mouse-agent-image-tag.json product-managers-image-tag.json assistants-image-tag.json
+        git add agent-hosts/image-tags/mouse-agent-image-tag.json agent-hosts/image-tags/product-managers-image-tag.json agent-hosts/image-tags/assistants-image-tag.json
         git commit -m "Promote agentic-api image tags to $COMMIT_SHA" || echo "No changes to commit"
         git push origin main
     secretEnv:
