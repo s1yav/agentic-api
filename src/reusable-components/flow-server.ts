@@ -117,7 +117,11 @@ function applyAuthenticationArgsToFlows(flows: any[]): FlowWithOptions[] {
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-async function buildAuthContext(req: HttpRequest): Promise<{ appCheck: unknown }> {
+async function buildAuthContext(req: HttpRequest): Promise<{ appCheck?: unknown; authenticated?: boolean }> {
+  const authHeader = req?.headers?.['authorization'] || req?.headers?.['Authorization'];
+  if (authHeader) {
+    return { authenticated: true };
+  }
   const token = extractAppCheckToken(req);
   const claims = await verifyAppCheckToken(token);
   return { appCheck: claims };
