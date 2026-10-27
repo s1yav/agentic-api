@@ -117,33 +117,10 @@ function applyAuthenticationArgsToFlows(flows: any[]): FlowWithOptions[] {
   return flows.map((flow) => withFlowOptions(flow, flowOptions));
 }
 
-async function buildAuthContext(req: HttpRequest): Promise<{ appCheck?: unknown; authenticated?: boolean }> {
+async function buildAuthContext(req: HttpRequest): Promise<{ authenticated?: boolean }> {
   const authHeader = req?.headers?.['authorization'] || req?.headers?.['Authorization'];
-  if (authHeader) {
-    return { authenticated: true };
+  if (!authHeader) {
+    throw new UnauthorizedError('Authorization header missing');
   }
-  const token = extractAppCheckToken(req);
-  const claims = await verifyAppCheckToken(token);
-  return { appCheck: claims };
-}
-
-function extractAppCheckToken(req: HttpRequest): string {
-  const headerKey = APP_CHECK_HEADER.toLowerCase();
-  const token = req?.headers?.[headerKey] || req?.headers?.[APP_CHECK_HEADER];
-  const tokenValue = Array.isArray(token) ? token[0] : token;
-
-  if (!tokenValue) {
-    throw new MissingHeaderError(APP_CHECK_HEADER);
-  }
-
-  return tokenValue;
-}
-
-async function verifyAppCheckToken(token: string): Promise<unknown> {
-  try {
-    return await getAppCheck().verifyToken(token);
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    throw new UnauthorizedError('Unauthorized: Invalid Firebase App Check token', { reason });
-  }
+  return { authenticated: true }
 }
