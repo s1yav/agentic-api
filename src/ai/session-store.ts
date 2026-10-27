@@ -50,10 +50,8 @@ export interface SessionStore<S> {
 export class InMemorySessionStore<S> implements SessionStore<S> {
     private readonly store: Map<string, S>;
 
-    constructor(initialEntries?: Map<string, S> | Record<string, S>) {
-        if (initialEntries instanceof Map) {
-            this.store = new Map(initialEntries);
-        } else if (initialEntries && typeof initialEntries === 'object') {
+    protected constructor(initialEntries?: Map<string, S> | Record<string, S>) {
+        if (initialEntries) {
             this.store = new Map(Object.entries(initialEntries));
         } else {
             this.store = new Map();
