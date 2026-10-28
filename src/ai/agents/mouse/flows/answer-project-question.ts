@@ -45,7 +45,7 @@ async function generateProjectAnswer(
   };
 }
 
-function constructProjectQuestionPrompt(input: AnswerProjectQuestionInput): string {
+export function constructProjectQuestionPrompt(input: AnswerProjectQuestionInput): string {
   const contextNote = input.projectContext ? `Target Project Context: ${input.projectContext}.` : '';
 
   return `You are Mouse, the dedicated Executive Assistant for this project portfolio.
