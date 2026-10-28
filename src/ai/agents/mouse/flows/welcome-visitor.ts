@@ -42,7 +42,7 @@ async function generateWelcomeResponse(
   };
 }
 
-function constructWelcomePrompt(input: WelcomeVisitorInput): string {
+export function constructWelcomePrompt(input: WelcomeVisitorInput): string {
   const visitorContext = input.visitorName ? `Visitor: ${input.visitorName}.` : 'Visitor: Guest.';
   const referrerContext = input.referrer ? `Referrer: ${input.referrer}.` : '';
 
