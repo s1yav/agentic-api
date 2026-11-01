@@ -1,5 +1,6 @@
 import { ai } from '../../../genkit';
 import { z } from 'zod';
+import { buildMouseGenerateOptions, MAX_PROJECT_ANSWER_TOKENS } from './generation-config';
 
 export interface AnswerProjectQuestionInput {
   question: string;
@@ -36,7 +37,9 @@ async function generateProjectAnswer(
   input: AnswerProjectQuestionInput
 ): Promise<AnswerProjectQuestionOutput> {
   const prompt = constructProjectQuestionPrompt(input);
-  const response = await ai.generate(prompt);
+  const response = await ai.generate(
+    buildMouseGenerateOptions(prompt, MAX_PROJECT_ANSWER_TOKENS)
+  );
 
   return {
     answer: response.text,
