@@ -1,5 +1,6 @@
 import { ai } from '../../../genkit';
 import { z } from 'zod';
+import { buildMouseGenerateOptions, MAX_WELCOME_GREETING_TOKENS } from './generation-config';
 
 export interface WelcomeVisitorInput {
   visitorName?: string;
@@ -34,7 +35,9 @@ async function generateWelcomeResponse(
   input: WelcomeVisitorInput
 ): Promise<WelcomeVisitorOutput> {
   const prompt = constructWelcomePrompt(input);
-  const response = await ai.generate(prompt);
+  const response = await ai.generate(
+    buildMouseGenerateOptions(prompt, MAX_WELCOME_GREETING_TOKENS)
+  );
 
   return {
     greeting: response.text,
