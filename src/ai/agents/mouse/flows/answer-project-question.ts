@@ -19,7 +19,7 @@ const answerProjectQuestionInputSchema = z.object({
 });
 
 const answerProjectQuestionOutputSchema = z.object({
-  answer: z.string().describe('Clear, technical answer strictly focused on projects or redirecting personal inquiries'),
+  answer: z.string().describe('Concise, technical answer strictly focused on projects or redirecting personal inquiries'),
   referencedProjects: z.array(z.string()).describe('List of portfolio projects referenced in the response'),
   suggestedFollowUps: z.array(z.string()).describe('Suggested technical follow-up questions'),
 });
