@@ -18,7 +18,7 @@ const welcomeVisitorInputSchema = z.object({
 });
 
 const welcomeVisitorOutputSchema = z.object({
-  greeting: z.string().describe('Warm, professional executive assistant welcome greeting'),
+  greeting: z.string().describe('Concise, warm executive assistant welcome greeting (1-2 sentences)'),
   suggestedTopics: z.array(z.string()).describe('Suggested engineering projects and topics to explore'),
 });
 
