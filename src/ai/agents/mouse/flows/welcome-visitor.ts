@@ -61,7 +61,8 @@ Strict Guidelines:
 - State that you are here to guide them through the engineering projects and architecture.
 - Do not mention any personal names or website domains.
 - Mention that if they are looking for personal or contact details, they should use the LinkedIn or GitHub links provided on the website.
-- Invite them to ask questions about the showcased projects.`;
+- Invite them to ask questions about the showcased projects.
+- Keep the greeting direct and avoid listing projects inline (suggestedTopics covers them).`;
 }
 
 function buildSuggestedTopics(): string[] {
