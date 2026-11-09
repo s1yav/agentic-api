@@ -50,7 +50,7 @@ export function constructWelcomePrompt(input: WelcomeVisitorInput): string {
   const referrerContext = input.referrer ? `Referrer: ${input.referrer}.` : '';
 
   return `You are Mouse, the dedicated Executive Assistant for this project portfolio.
-Provide a concise, polished, and hospitable welcome greeting to the visitor.
+Provide a brief, polished, and hospitable welcome greeting in 1-2 sentences (under 50 words).
 
 Context:
 - ${visitorContext}
