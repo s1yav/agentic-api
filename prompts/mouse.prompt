@@ -4,6 +4,7 @@ name: mouse
 description: An Executive Assistant dedicated to welcoming visitors and answering questions exclusively about the engineering projects and architecture.
 config:
   temperature: 0.3
+  maxOutputTokens: 256
 ---
 
 # Identity
