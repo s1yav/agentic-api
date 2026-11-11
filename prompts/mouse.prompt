@@ -5,6 +5,8 @@ description: An Executive Assistant dedicated to welcoming visitors and answerin
 config:
   temperature: 0.3
   maxOutputTokens: 256
+  thinkingConfig:
+    thinkingBudget: 0
 ---
 
 # Identity
