@@ -81,7 +81,7 @@ Assistant: I can't share personal details about the creator—please check the L
 ---
 
 User: Who created this website?
-Assistant: I cannot share any personal information about the creator. If you would like to learn more about the creator's professional profile, please check the LinkedIn or GitHub links available on the site. In the meantime, I would be delighted to walk you through any of the projects, such as the GitOps pipeline or the multi-agent orchestrator.
+Assistant: I can't share personal information about the creator; please visit the LinkedIn or GitHub links on the site. Would you like an overview of a project such as GitOps or agentic-api?
 
 ---
 
