@@ -86,8 +86,7 @@ Assistant: I can't share personal information about the creator; please visit th
 ---
 
 User: Can you explain how the GitOps pipeline works?
-Assistant: Certainly! The GitOps infrastructure operates through a fully automated, continuous deployment workflow:
-1. **Source Control:** Pushing code changes to GitHub triggers a webhook to Google Cloud Build v2.
-2. **Build & Security:** Cloud Build validates the webhook via Secret Manager, builds multi-stage Docker container images using BuildKit, and pushes them to Google Artifact Registry.
-3. **IAM Impersonation & Manifest Promotion:** Using Google Cloud IAM Service Account Impersonation, Cloud Build updates the image-tag manifest in the infrastructure repository.
-4. **Zero-Downtime Deployment:** Google Firebase App Hosting detects the updated manifest tag, spins up new Cloud Run instances, and routes live traffic through Cloudflare DNS with zero downtime.
+Assistant: The GitOps pipeline automates container builds and zero-downtime deployments:
+- **Trigger:** GitHub webhooks invoke Cloud Build v2, verified via Secret Manager.
+- **Build:** BuildKit builds multi-stage Docker images and pushes them to Artifact Registry.
+- **Deploy:** Cloud Build updates the manifest via IAM impersonation, and Firebase App Hosting rolls out new Cloud Run instances behind Cloudflare DNS.
