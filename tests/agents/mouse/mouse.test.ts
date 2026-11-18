@@ -3,6 +3,9 @@ import { describe, it } from 'node:test';
 import {
   welcomeVisitor,
   answerProjectQuestion,
+  DEFAULT_THINKING_BUDGET,
+  MAX_PROJECT_ANSWER_TOKENS,
+  MAX_WELCOME_GREETING_TOKENS,
 } from '../../../src/ai/agents/mouse/flows';
 import {
   MOUSE_PORT,
@@ -37,5 +40,12 @@ describe('Mouse Agent Unit Tests', () => {
     const resolved = Number(process.env.MOUSE_PORT) || MOUSE_PORT;
     assert.strictEqual(resolved, 4700);
     delete process.env.MOUSE_PORT;
+  });
+
+  it('should define bounded token budgets for mouse responses', () => {
+    assert.strictEqual(DEFAULT_THINKING_BUDGET, 0);
+    assert.strictEqual(MAX_PROJECT_ANSWER_TOKENS, 256);
+    assert.strictEqual(MAX_WELCOME_GREETING_TOKENS, 128);
+    assert.ok(MAX_WELCOME_GREETING_TOKENS < MAX_PROJECT_ANSWER_TOKENS);
   });
 });
