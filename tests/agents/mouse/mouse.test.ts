@@ -6,6 +6,7 @@ import {
   DEFAULT_THINKING_BUDGET,
   MAX_PROJECT_ANSWER_TOKENS,
   MAX_WELCOME_GREETING_TOKENS,
+  buildMouseGenerateOptions,
 } from '../../../src/ai/agents/mouse/flows';
 import {
   MOUSE_PORT,
@@ -47,5 +48,12 @@ describe('Mouse Agent Unit Tests', () => {
     assert.strictEqual(MAX_PROJECT_ANSWER_TOKENS, 256);
     assert.strictEqual(MAX_WELCOME_GREETING_TOKENS, 128);
     assert.ok(MAX_WELCOME_GREETING_TOKENS < MAX_PROJECT_ANSWER_TOKENS);
+  });
+
+  it('should build generate options with maxOutputTokens and zero thinkingBudget', () => {
+    const options = buildMouseGenerateOptions('Explain gitops', MAX_PROJECT_ANSWER_TOKENS);
+    assert.strictEqual(options.prompt, 'Explain gitops');
+    assert.strictEqual(options.config.maxOutputTokens, 256);
+    assert.strictEqual(options.config.thinkingConfig.thinkingBudget, 0);
   });
 });
