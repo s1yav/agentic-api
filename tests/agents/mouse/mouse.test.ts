@@ -7,6 +7,7 @@ import {
   MAX_PROJECT_ANSWER_TOKENS,
   MAX_WELCOME_GREETING_TOKENS,
   buildMouseGenerateOptions,
+  constructProjectQuestionPrompt,
 } from '../../../src/ai/agents/mouse/flows';
 import {
   MOUSE_PORT,
@@ -55,5 +56,17 @@ describe('Mouse Agent Unit Tests', () => {
     assert.strictEqual(options.prompt, 'Explain gitops');
     assert.strictEqual(options.config.maxOutputTokens, 256);
     assert.strictEqual(options.config.thinkingConfig.thinkingBudget, 0);
+  });
+
+  it('should enforce concise length rules in project question prompt', () => {
+    const prompt = constructProjectQuestionPrompt({
+      question: 'How does gitops work?',
+      projectContext: 'gitops',
+    });
+
+    assert.ok(prompt.includes('2-4 sentences'));
+    assert.ok(prompt.includes('under 120 words'));
+    assert.ok(prompt.includes('avoid unnecessary preamble or repetition'));
+    assert.ok(!prompt.includes('detailed, accurate, and structured technical explanation'));
   });
 });
