@@ -69,4 +69,13 @@ describe('Mouse Agent Unit Tests', () => {
     assert.ok(prompt.includes('avoid unnecessary preamble or repetition'));
     assert.ok(!prompt.includes('detailed, accurate, and structured technical explanation'));
   });
+
+  it('should preserve strict privacy redirect rules in project question prompt', () => {
+    const prompt = constructProjectQuestionPrompt({
+      question: 'Who is the author?',
+    });
+
+    assert.ok(prompt.includes('STRICT PRIVACY'));
+    assert.ok(prompt.includes('LinkedIn or GitHub'));
+  });
 });
