@@ -8,6 +8,7 @@ import {
   MAX_WELCOME_GREETING_TOKENS,
   buildMouseGenerateOptions,
   constructProjectQuestionPrompt,
+  constructWelcomePrompt,
 } from '../../../src/ai/agents/mouse/flows';
 import {
   MOUSE_PORT,
@@ -77,5 +78,13 @@ describe('Mouse Agent Unit Tests', () => {
 
     assert.ok(prompt.includes('STRICT PRIVACY'));
     assert.ok(prompt.includes('LinkedIn or GitHub'));
+  });
+
+  it('should enforce brief greeting rules in welcome prompt', () => {
+    const prompt = constructWelcomePrompt({ visitorName: 'Alex' });
+
+    assert.ok(prompt.includes('1-2 sentences'));
+    assert.ok(prompt.includes('under 50 words'));
+    assert.ok(prompt.includes('avoid listing projects inline'));
   });
 });
