@@ -1,4 +1,6 @@
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it } from 'node:test';
 import {
   welcomeVisitor,
@@ -86,5 +88,16 @@ describe('Mouse Agent Unit Tests', () => {
     assert.ok(prompt.includes('1-2 sentences'));
     assert.ok(prompt.includes('under 50 words'));
     assert.ok(prompt.includes('avoid listing projects inline'));
+  });
+
+  it('should configure maxOutputTokens and thinkingBudget in mouse.prompt', () => {
+    const promptFile = readFileSync(
+      resolve(process.cwd(), 'prompts/mouse.prompt'),
+      'utf-8'
+    );
+
+    assert.ok(promptFile.includes('maxOutputTokens: 256'));
+    assert.ok(promptFile.includes('thinkingBudget: 0'));
+    assert.ok(promptFile.includes('under 120 words'));
   });
 });
