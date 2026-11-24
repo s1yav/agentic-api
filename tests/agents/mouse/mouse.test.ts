@@ -100,4 +100,17 @@ describe('Mouse Agent Unit Tests', () => {
     assert.ok(promptFile.includes('thinkingBudget: 0'));
     assert.ok(promptFile.includes('under 120 words'));
   });
+
+  it('should handle optional projectContext cleanly in prompt construction', () => {
+    const withContext = constructProjectQuestionPrompt({
+      question: 'What is agentic-api?',
+      projectContext: 'agentic-api',
+    });
+    const withoutContext = constructProjectQuestionPrompt({
+      question: 'What is agentic-api?',
+    });
+
+    assert.ok(withContext.includes('Target Project Context: agentic-api.'));
+    assert.ok(!withoutContext.includes('Target Project Context:'));
+  });
 });
