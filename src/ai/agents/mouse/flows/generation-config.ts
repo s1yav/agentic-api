@@ -1,5 +1,10 @@
+/** Disable thinking tokens so output token limits apply cleanly to visible text. */
 export const DEFAULT_THINKING_BUDGET = 0;
+
+/** Maximum output tokens for technical project answers. */
 export const MAX_PROJECT_ANSWER_TOKENS = 256;
+
+/** Maximum output tokens for visitor welcome greetings. */
 export const MAX_WELCOME_GREETING_TOKENS = 128;
 
 export interface MouseThinkingConfig {
@@ -17,6 +22,9 @@ export interface MouseGenerateOptions {
   config: MouseGenerateConfig;
 }
 
+/**
+ * Builds bounded Genkit generation options for Mouse flows.
+ */
 export function buildMouseGenerateOptions(
   prompt: string,
   maxOutputTokens: number
